@@ -45,10 +45,11 @@ const isValidDateFormat = (date: string) => {
 //     })
 // }
 const imageUrlGen = (filePath: string) => {
-    const baseUrl = process.env.BACKEND_BASE_URL!
+    // const baseUrl = process.env.BACKEND_BASE_URL!
     // if (baseUrl.includes(process.env.PORT!)) {
-    const gen_url = process.env.BACKEND_BASE_URL! + "/images/" + filePath;
-    return gen_url
+        // const gen_url = process.env.BACKEND_BASE_URL! + "/images/" + filePath;
+        const gen_url = "http://localhost:3000/images/" + filePath;
+        return gen_url
     // } else {
     // const gen_url = process.env.BACKEND_BASE_URL! + `:${process.env.PORT}` + "/images/" + filePath;
     // return gen_url

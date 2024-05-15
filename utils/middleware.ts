@@ -3,7 +3,8 @@ import jwt from 'jsonwebtoken'
 import { User } from '../models/user'
 
 export type ExtendedRequest = Request & {
-    user: any
+    user: any,
+    file: any
 }
 
 const AuthMiddleware = async (req: ExtendedRequest, res: Response, next: NextFunction) => {

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import userController from "../controller/user.controller";
-import middleware from "../utils/middleware";
+import { upload } from "..";
 
 const userRouter = Router()
 
@@ -8,6 +8,10 @@ const userRouter = Router()
 userRouter.get('/', userController.getUserDetails)
 //@ts-ignore
 userRouter.put('/', userController.updateUserDetails)
+//@ts-ignore
+userRouter.put('/questions', userController.signupQuestions)
+//@ts-ignore
+userRouter.put('/avatar', upload.single("file"), userController.updateUserAvatar)
 //@ts-ignore
 userRouter.delete('/', userController.deleteUser)
 

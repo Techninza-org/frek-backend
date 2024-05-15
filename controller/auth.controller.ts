@@ -9,7 +9,7 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
     if(!isValidPayload){
         return res.status(400).send({error: 'Invalid payload', error_message: 'name, email, password, gender, dob are required'})
     }
-    const {name, email, password, gender, dob, signup_questions} = req.body
+    const {name, email, password, gender, dob} = req.body
     try{
         const existingUser = await User.findOne({email})
         if(existingUser){
@@ -22,7 +22,6 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
             password: hashedPassword,
             gender,
             dob,
-            signup_questions
         })
         const token = jwt.sign({email: req.body.email}, process.env.JWT_SECRET!, {
             expiresIn: '7d'
