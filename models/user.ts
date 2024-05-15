@@ -6,6 +6,7 @@ const UserSchema = new Schema({
     password: {type: String, required: true},
     gender: {type: Number, required: true},   //0, 1, 2
     dob: {type: String, required: true},
+    age: {type: Number, required: true},
     phone: {type: Number, required: false},
     bio: {type: String, required: false},
     preference: {type: String, required: false},
@@ -17,7 +18,11 @@ const UserSchema = new Schema({
             answer: {type: Boolean, required: true}
         }], 
         required: false
-    }
+    },
+    createdAt: {type: Date, default: Date.now},
+    likedBy: {type: [Schema.Types.ObjectId], required: false},
+    matched: {type: [Schema.Types.ObjectId], required: false},
+    liked: {type: [Schema.Types.ObjectId], required: false}
 })
 
 export const User = models.User || model('User', UserSchema)

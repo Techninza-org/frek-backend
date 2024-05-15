@@ -65,5 +65,27 @@ const deleteUser = async (req: ExtendedRequest, res: Response, next: NextFunctio
     }
 }
 
-const userController = {getUserDetails, signupQuestions, updateUserDetails, deleteUser, updateUserAvatar}
+const getFeed = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    try{
+        const users = await User.find({ _id: { $ne: req.user._id } });
+        users.sort(() => Math.random() - 0.5)
+        const feed = users.map(user => ({name: user.name, bio: user.bio, avatar: user.avatar}))
+        return res.status(200).send({feed})
+    }catch(error){
+        return res.status(400).send({message: 'Error fetching feed'})
+    }
+}
+
+const getMatchedUsers = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    try{
+        const user = req.user
+        if(!user) return res.status(400).send({message: 'User not found'})
+        const matchedUsers = await User.find({_id: {$in: user.matched}}, {_id: 1})
+        return res.status(200).send({matchedUsers})
+    }catch(err){
+        return res.status(400).send({message: 'Error fetching matched users'})
+    }
+}
+
+const userController = {getUserDetails, signupQuestions, updateUserDetails, deleteUser, updateUserAvatar, getFeed, getMatchedUsers}
 export default userController

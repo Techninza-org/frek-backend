@@ -7,6 +7,10 @@ const userRouter = Router()
 //@ts-ignore
 userRouter.get('/', userController.getUserDetails)
 //@ts-ignore
+userRouter.get('/feed', userController.getFeed)
+//@ts-ignore
+userRouter.get('/matched', userController.getMatchedUsers)
+//@ts-ignore
 userRouter.put('/', userController.updateUserDetails)
 //@ts-ignore
 userRouter.put('/questions', userController.signupQuestions)
