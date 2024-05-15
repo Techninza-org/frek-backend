@@ -4,6 +4,7 @@ import mongoose from "mongoose"
 import dotenv from 'dotenv'
 import authRouter from "./routes/auth.routes"
 import userRouter from "./routes/user.routes"
+import middleware from "./utils/middleware"
 dotenv.config()
 
 
@@ -18,7 +19,8 @@ app.get('/ping', (req, res) => {
 app.get('/', (req, res) => res.send('Server running...'))
 
 app.use('/auth', authRouter)
-app.use('/user', userRouter)
+//@ts-ignore
+app.use('/user', middleware.AuthMiddleware, userRouter)
 
 //connecting to db
 mongoose.connect(process.env.MONGO_URI!)
