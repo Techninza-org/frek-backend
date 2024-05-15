@@ -34,7 +34,6 @@ const AuthMiddleware = async (req: ExtendedRequest, res: Response, next: NextFun
     }
 
     const email: string = decryptedToken?.email
-    console.log(email);
     
     if (!email) {
         const err = new Error("Error: token doens't contain email")

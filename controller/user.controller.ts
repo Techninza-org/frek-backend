@@ -11,8 +11,9 @@ const updateUserDetails = async (req: ExtendedRequest, res: Response, next: Next
         const user = req.user
         const {phone, bio, preference, email_notify, avatar} = req.body
         if(!user) return res.status(400).send({message: 'User not found'})
-        if(!phone || !bio || !preference || !email_notify || !avatar) return res.status(400).send({message: 'All fields are required'})
-            
+        if (phone === undefined || bio === undefined || preference === undefined || email_notify === undefined || avatar === undefined) {
+            return res.status(400).send({message: 'All fields are required'});
+        }
         const updatedUser = await User.findByIdAndUpdate(user._id, {phone, bio, preference, email_notify, avatar}, {new: true})
         return res.status(200).send({message: 'User details updated successfully', user: updatedUser})
     }catch(err){
