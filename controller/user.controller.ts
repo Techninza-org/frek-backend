@@ -54,6 +54,19 @@ const updateUserAvatar = async (req: ExtendedRequest, res: Response, next: NextF
     }
 }
 
+const uploadPics = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    try{
+        const user = req.user
+        if(!user) return res.status(400).send({message: 'User not found'})
+        if(!req.files || !Array.isArray(req.files)) return res.status(400).send({message: 'Pics not found'})
+        const images = req.files.map((file: any) => helper.imageUrlGen(file))
+        const updatedUser = await User.findByIdAndUpdate(user._id, {pics: images}, {new: true})
+        return res.status(200).send({message: 'User pics uploaded successfully', files: req.files, user: updatedUser})
+    }catch(err){
+        return res.status(400).send({message: 'Error updating user pics'})
+    }
+}
+
 const deleteUser = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     try{
         const user = req.user
@@ -87,5 +100,5 @@ const getMatchedUsers = async (req: ExtendedRequest, res: Response, next: NextFu
     }
 }
 
-const userController = {getUserDetails, signupQuestions, updateUserDetails, deleteUser, updateUserAvatar, getFeed, getMatchedUsers}
+const userController = {getUserDetails, signupQuestions, updateUserDetails, deleteUser, updateUserAvatar, getFeed, getMatchedUsers, uploadPics}
 export default userController

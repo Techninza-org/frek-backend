@@ -17,6 +17,8 @@ userRouter.put('/questions', userController.signupQuestions)
 //@ts-ignore
 userRouter.put('/avatar', upload.single("file"), userController.updateUserAvatar)
 //@ts-ignore
+userRouter.put('/pics', upload.array("files", 3), userController.uploadPics)
+//@ts-ignore
 userRouter.delete('/', userController.deleteUser)
 
 export default userRouter
