@@ -5,11 +5,11 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 
 const signUp = async (req: Request, res: Response, next: NextFunction) => {
-    const isValidPayload = helper.isValidatePaylod(req.body, ['name', 'email', 'password', 'gender', 'dob', 'age'])
+    const isValidPayload = helper.isValidatePaylod(req.body, ['name', 'email', 'password', 'gender', 'dob'])
     if(!isValidPayload){
-        return res.status(400).send({error: 'Invalid payload', error_message: 'name, email, password, gender, dob, age are required'})
+        return res.status(400).send({error: 'Invalid payload', error_message: 'name, email, password, gender, dob are required'})
     }
-    const {name, email, password, gender, dob, age} = req.body
+    const {name, email, password, gender, dob} = req.body
     try{
         const existingUser = await User.findOne({email})
         if(existingUser){
@@ -22,7 +22,7 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
             password: hashedPassword,
             gender,
             dob,
-            age
+            age: 18
         })
         const token = jwt.sign({email: req.body.email}, process.env.JWT_SECRET!, {
             expiresIn: '7d'
