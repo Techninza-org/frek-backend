@@ -7,5 +7,7 @@ const messageRouter = Router()
 messageRouter.post('/send/:receiverId', messageController.sendMessage)
 //@ts-ignore
 messageRouter.get('/conversation/:receiverId', messageController.getConversation)
+//@ts-ignore
+messageRouter.get('/conversations', messageController.getAllConversations)
 
 export default messageRouter

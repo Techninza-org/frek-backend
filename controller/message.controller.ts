@@ -49,5 +49,15 @@ export const getConversation = async (req: ExtendedRequest, res: Response, next:
     }
 }
 
-const messageController = {sendMessage, getConversation}
+export const getAllConversations = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    try{
+        const senderId = req.user._id
+        let conversations = await Conversation.find({participants: senderId}).populate('messages')
+        return res.status(200).send({conversations})
+    }catch(err){
+        return res.status(500).send({message: 'Error getting conversations'})
+    }
+}
+
+const messageController = {sendMessage, getConversation, getAllConversations}
 export default messageController
