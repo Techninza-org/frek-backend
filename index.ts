@@ -25,8 +25,8 @@ export const upload = multer({ storage: imageStorage })
 
 const PORT = process.env.PORT || 3000
 import('./app')
-    .then((app) => {
-        app.default.listen(PORT, () => console.log(`Server running on ${PORT}`))
+    .then((server) => {
+        server.default.listen(PORT, () => console.log(`Server running on ${PORT}`))
     })
     .catch((err) => {
         console.error('Error in loading app', err)
