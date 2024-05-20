@@ -11,11 +11,11 @@ userRouter.get('/feed', userController.getFeed)
 //@ts-ignore
 userRouter.get('/matched', userController.getMatchedUsers)
 //@ts-ignore
-userRouter.put('/', userController.updateUserDetails)
+userRouter.put('/', upload.single("file"), userController.updateUserDetails)
 //@ts-ignore
 userRouter.put('/questions', userController.signupQuestions)
 //@ts-ignore
-userRouter.put('/avatar', upload.single("file"), userController.updateUserAvatar)
+// userRouter.put('/avatar', upload.single("file"), userController.updateUserAvatar)
 //@ts-ignore
 userRouter.put('/pics', upload.array("files", 3), userController.uploadPics)
 //@ts-ignore
