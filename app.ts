@@ -9,12 +9,13 @@ import userRouter from "./routes/user.routes"
 import middleware from "./utils/middleware"
 import actionRouter from "./routes/action.routes"
 import messageRouter from "./routes/message.routes"
+import path from "path";
 dotenv.config()
 
 const app = express()
 app.use(cors())
 app.use(express.json())
-
+app.use('/public', express.static(path.join(__dirname, 'public')));
 const server = http.createServer(app);
 
 const io = new Server(server, {
