@@ -10,8 +10,9 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
         return res.status(400).send({error: 'Invalid payload', error_message: 'name, email, password, gender, dob are required'})
     }
     const {name, email, password, gender, dob} = req.body
-    dob.toString();
-    const parts = dob.split('-');
+    console.log(dob);
+    const dobString = String(dob);
+    const parts = dobString.split('-');
     const year = parts[2];
     const age = new Date().getFullYear() - Number(year);
     console.log(age);
@@ -27,7 +28,7 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
             email,
             password: hashedPassword,
             gender,
-            dob,
+            dob: dobString,
             age,
             avatar: "http://45.61.60.89:3000/public/images/1718965492683-default.png",
         })
