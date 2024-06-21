@@ -45,7 +45,11 @@ const isValidDateFormat = (date: string) => {
 //     })
 // }
 const imageUrlGen = (filePath: any) => {
-        const gen_url = "http://45.61.60.89:3000/public/images/" + filePath.path;  //filename
+    console.log(filePath);
+    console.log(filePath.filename);
+    
+    
+        const gen_url = "http://45.61.60.89:3000/public/images/" + filePath.filename; 
         return gen_url
 }
 const helper = { isValidatePaylod, isValidDateFormat, imageUrlGen }  //sendMail
