@@ -12,7 +12,7 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
     const {name, email, password, gender, dob} = req.body
     console.log(dob);
     const dobString = String(dob);
-    const parts = dobString.split('-');
+    const parts = dobString.split('/');
     const year = parts[2];
     const age = new Date().getFullYear() - Number(year);
     console.log(age);
