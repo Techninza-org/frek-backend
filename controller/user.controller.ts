@@ -12,12 +12,13 @@ const updateUserDetails = async (req: ExtendedRequest, res: Response, next: Next
         const user = req.user
         const {phone, bio, preference, email_notify, name, email} = req.body
         console.log(req.body);
+
         
         if(!user) return res.status(400).send({message: 'User not found'})
             console.log('updating...');
             
             const updatedUser = await User.findByIdAndUpdate(user._id, {
-                phone, bio, preference, email_notify, name, email, avatar: helper.imageUrlGen(req.file)
+                phone, bio, preference, email_notify, name, email, avatar: req.file ? helper.imageUrlGen(req.file) : undefined
             }, { new: true });
             console.log('updated');
             
