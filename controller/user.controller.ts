@@ -11,13 +11,14 @@ const updateUserDetails = async (req: ExtendedRequest, res: Response, next: Next
     try{
         const user = req.user
         const {phone, bio, preference, email_notify, name, email} = req.body
+        console.log(req.body);
+        
         if(!user) return res.status(400).send({message: 'User not found'})
-            const updatedUser = await User.findByIdAndUpdate({
-                where: { id: user.id },
-                data: {
+            const updatedUser = await User.findByIdAndUpdate(user._id, {
+                $set: {
                     phone, bio, preference, email_notify, name, email, avatar: helper.imageUrlGen(req.file)
-                },
-            })
+                }
+            }, { new: true })
             delete (updatedUser as any).password
         return res.status(200).send({message: 'User details updated successfully', user: updatedUser})
         
