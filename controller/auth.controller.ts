@@ -10,12 +10,10 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
         return res.status(400).send({error: 'Invalid payload', error_message: 'name, email, password, gender, dob are required'})
     }
     const {name, email, password, gender, dob} = req.body
-    console.log(dob);
     const dobString = String(dob);
     const parts = dobString.split('/');
     const year = parts[2];
     const age = new Date().getFullYear() - Number(year);
-    console.log(age);
     
     try{
         const existingUser = await User.findOne({email})
