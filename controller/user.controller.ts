@@ -16,15 +16,12 @@ const updateUserDetails = async (req: ExtendedRequest, res: Response, next: Next
         if(!user) return res.status(400).send({message: 'User not found'})
             console.log('updating...');
             
-            const updatedUser = await User.findByIdAndUpdate({
-                where: { id: user.id },
-                data: {
-                    phone: phone, bio: bio, preference: preference, email_notify: email_notify, name: name, email: email, avatar: helper.imageUrlGen(req.file)
-                },
-            })
+            const updatedUser = await User.findByIdAndUpdate(user._id, {
+                phone, bio, preference, email_notify, name, email, avatar: helper.imageUrlGen(req.file)
+            }, { new: true });
             console.log('updated');
             
-            delete (updatedUser as any).password
+            // delete (updatedUser as any).password
         return res.status(200).send({message: 'User details updated successfully', user: updatedUser})
         
     }catch(err){
