@@ -12,15 +12,22 @@ const updateUserDetails = async (req: ExtendedRequest, res: Response, next: Next
         const user = req.user
         const {phone, bio, preference, email_notify, name, email} = req.body
         if(!user) return res.status(400).send({message: 'User not found'})
-        // if (phone === undefined || bio === undefined || preference === undefined || email_notify === undefined) {
-        //     return res.status(400).send({message: 'All fields are required'});
-        // }
-        const updatedUser = await User.findByIdAndUpdate(user._id, {name, email, phone, bio, preference, email_notify, avatar: helper.imageUrlGen(req.file)}, {new: true})
+            const updatedUser = await User.findByIdAndUpdate({
+                where: { id: user.id },
+                data: {
+                    phone, bio, preference, email_notify, name, email, avatar: helper.imageUrlGen(req.file)
+                },
+            })
+            delete (updatedUser as any).password
         return res.status(200).send({message: 'User details updated successfully', user: updatedUser})
+        
     }catch(err){
         return res.status(400).send({message: 'Error updating user details'})
     }
 }
+
+// const updatedUser = await User.findByIdAndUpdate(user._id, {name, email, phone, bio, preference, email_notify, avatar: helper.imageUrlGen(req.file)})
+//         return res.status(200).send({message: 'User details updated successfully', user: updatedUser})
 
 const signupQuestions = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     const user = req.user
