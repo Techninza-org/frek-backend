@@ -25,7 +25,7 @@ const updateUserDetails = async (req: ExtendedRequest, res: Response, next: Next
         return res.status(200).send({message: 'User details updated successfully', user: updatedUser})
         
     }catch(err){
-        return res.status(400).send({message: 'Error updating user details'})
+        return next(err)
     }
 }
 
