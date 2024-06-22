@@ -10,12 +10,12 @@ const getUserDetails = async (req: ExtendedRequest, res: Response, next: NextFun
 const updateUserDetails = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     try{
         const user = req.user
-        const {phone, bio, preference, email_notify, name, email} = req.body
+        const {phone, bio, preference, email_notify, name} = req.body
         
         if(!user) return res.status(400).send({message: 'User not found'})
             
             const updatedUser = await User.findByIdAndUpdate(user._id, {
-                phone, bio, preference, email_notify, name, email, avatar: req.file ? helper.imageUrlGen(req.file) : undefined
+                phone, bio, preference, email_notify, name, avatar: req.file ? helper.imageUrlGen(req.file) : undefined
             }, { new: true });
             
             delete (updatedUser as any).password
