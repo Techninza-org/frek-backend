@@ -19,7 +19,7 @@ const updateUserDetails = async (req: ExtendedRequest, res: Response, next: Next
             const updatedUser = await User.findByIdAndUpdate({
                 where: { id: user.id },
                 data: {
-                    phone, bio, preference, email_notify, name, email, avatar: helper.imageUrlGen(req.file)
+                    phone: phone, bio: bio, preference: preference, email_notify: email_notify, name: name, email: email, avatar: helper.imageUrlGen(req.file)
                 },
             })
             console.log('updated');
