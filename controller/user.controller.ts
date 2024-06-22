@@ -26,9 +26,6 @@ const updateUserDetails = async (req: ExtendedRequest, res: Response, next: Next
     }
 }
 
-// const updatedUser = await User.findByIdAndUpdate(user._id, {name, email, phone, bio, preference, email_notify, avatar: helper.imageUrlGen(req.file)})
-//         return res.status(200).send({message: 'User details updated successfully', user: updatedUser})
-
 const signupQuestions = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     const user = req.user
     const isValidPayload = helper.isValidatePaylod(req.body, ['questions'])
