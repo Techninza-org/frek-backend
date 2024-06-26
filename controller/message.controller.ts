@@ -23,10 +23,11 @@ export const sendMessage = async (req: ExtendedRequest, res: Response, next: Nex
         }
         await Promise.all([getConversation.save(), newMessage.save()])
 
-        const receiverSocketId = getReceiverSocketId(receiverId)
-        if(receiverSocketId){
-            io.to(receiverSocketId).emit('newMessage', {message: newMessage})
-        }
+        // const receiverSocketId = getReceiverSocketId(receiverId)
+        // if(receiverSocketId){
+        //     io.emit('newMessage', {message: newMessage})
+        // }
+        io.emit('newMessage', {message: newMessage})
 
         return res.status(200).send({message: 'Message sent'})
     }catch(err){
