@@ -90,15 +90,5 @@ httpApp.use((req, res) => {
 });
 const httpServer = http.createServer(httpApp);
 
-httpServer.listen(80, () => {
-  console.log('HTTP server running on port 80 and redirecting to HTTPS');
-});
-
-httpsServer.listen(443, () => {
-  console.log('HTTPS server running on port 443');
-});
-
 export default httpsServer;
 export { io, httpsServer, httpServer };
-
-
