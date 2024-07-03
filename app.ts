@@ -45,9 +45,9 @@ mongoose.connect(process.env.MONGO_URI!)
         console.log(err);
     })
     
-const privateKey = fs.readFileSync('/etc/letsencrypt/live/example.com/privkey.pem', 'utf8');
-const certificate = fs.readFileSync('/etc/letsencrypt/live/example.com/cert.pem', 'utf8');
-const ca = fs.readFileSync('/etc/letsencrypt/live/example.com/chain.pem', 'utf8');
+const privateKey = fs.readFileSync('/etc/letsencrypt/live/thefrekapp.com/privkey.pem', 'utf8');
+const certificate = fs.readFileSync('/etc/letsencrypt/live/thefrekapp.com/cert.pem', 'utf8');
+const ca = fs.readFileSync('/etc/letsencrypt/live/thefrekapp.com/chain.pem', 'utf8');
 
 const credentials = {
     key: privateKey,
