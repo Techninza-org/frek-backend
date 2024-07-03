@@ -23,11 +23,21 @@ const imageStorage = multer.diskStorage({
 })
 export const upload = multer({ storage: imageStorage })
 
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 3000;
+const HTTP_PORT = process.env.HTTP_PORT || 80;
+
 import('./app')
     .then((server) => {
-        server.default.listen(PORT, () => console.log(`Server running on ${PORT}`))
+        const httpsServer = server.httpsServer; 
+        const httpServer = server.httpServer; 
+        httpsServer.listen(PORT, () => {
+            console.log(`HTTPS Server running on port ${PORT}`);
+        });
+
+        httpServer.listen(HTTP_PORT, () => {
+            console.log(`HTTP Server running on port ${HTTP_PORT} and redirecting to HTTPS`);
+        });
     })
     .catch((err) => {
-        console.error('Error in loading app', err)
-    })
+        console.error('Error in loading app', err);
+    });
