@@ -16,11 +16,11 @@ dotenv.config()
 
 const app = express()
 
-const corsOptions = {
-    origin: '*'
-};
+// const corsOptions = {
+//     origin: '*'
+// };
 
-app.use(cors(corsOptions))
+app.use(cors())
 app.use(express.json())
 app.use('/public', express.static(path.join(__dirname, 'public')));
 
