@@ -15,7 +15,12 @@ import fs from "fs";
 dotenv.config()
 
 const app = express()
-app.use(cors())
+
+const corsOptions = {
+    origin: 'https://thefrekapp.com'
+};
+
+app.use(cors(corsOptions))
 app.use(express.json())
 app.use('/public', express.static(path.join(__dirname, 'public')));
 
