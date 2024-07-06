@@ -86,7 +86,7 @@ const getFeed = async (req: ExtendedRequest, res: Response, next: NextFunction) 
     try{
         const users = await User.find({ _id: { $ne: req.user._id } });
         users.sort(() => Math.random() - 0.5)
-        const feed = users.map(user => ({name: user.name, age: user.age, avatar: user.avatar}))
+        const feed = users.map(user => ({id: user._id, name: user.name, age: user.age, avatar: user.avatar}))
         return res.status(200).send({feed})
     }catch(error){
         return res.status(400).send({message: 'Error fetching feed'})
