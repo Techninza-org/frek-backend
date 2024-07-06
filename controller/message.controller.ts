@@ -53,7 +53,7 @@ export const getConversation = async (req: ExtendedRequest, res: Response, next:
 export const getAllConversations = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     try{
         const senderId = req.user._id
-        let conversations = await Conversation.find({participants: senderId}).populate('messages')
+        let conversations = await Conversation.find({participants: senderId}).populate('messages').populate('participants')
         return res.status(200).send({conversations})
     }catch(err){
         return res.status(500).send({message: 'Error getting conversations'})
