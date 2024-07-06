@@ -97,8 +97,9 @@ const getMatchedUsers = async (req: ExtendedRequest, res: Response, next: NextFu
     try{
         const user = req.user
         if(!user) return res.status(400).send({message: 'User not found'})
-        const matchedUsers = await User.find({_id: {$in: user.matched}}, {_id: 1})
-        return res.status(200).send({matchedUsers})
+        const matchedUsers = await User.find({_id: {$in: user.matched}})
+        const feed = matchedUsers.map(user => ({id: user._id, name: user.name, age: user.age, avatar: user.avatar}))
+        return res.status(200).send({feed})
     }catch(err){
         return res.status(400).send({message: 'Error fetching matched users'})
     }
