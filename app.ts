@@ -12,6 +12,7 @@ import actionRouter from "./routes/action.routes"
 import messageRouter from "./routes/message.routes"
 import path from "path";
 import fs from "fs";
+import streamRouter from "./routes/stream.routes";
 dotenv.config()
 
 const app = express()
@@ -43,6 +44,8 @@ app.use('/user', middleware.AuthMiddleware, userRouter)
 app.use('/action', middleware.AuthMiddleware, actionRouter)
 //@ts-ignore
 app.use('/message', middleware.AuthMiddleware, messageRouter)
+
+app.use('/stream', streamRouter)
 
 mongoose.connect(process.env.MONGO_URI!)
     .then(() => console.log('db connected...'))

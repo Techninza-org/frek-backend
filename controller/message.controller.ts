@@ -7,6 +7,9 @@ import { getReceiverSocketId, io } from "../app"
 
 export const sendMessage = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     try{
+        const user = req.user
+        user.last_seen = new Date()
+        await user.save()
         const senderId = req.user._id
         const receiverId = req.params.receiverId
         const message = req.body.message
@@ -41,8 +44,10 @@ export const getConversation = async (req: ExtendedRequest, res: Response, next:
         const receiverId = req.params.receiverId
         if(!receiverId) return res.status(400).send({message: 'Receiver is required'})
         if(senderId === receiverId) return res.status(400).send({message: 'You can not get conversation with yourself'})
+        req.user.last_seen = new Date()
+        await req.user.save()
         
-        let getConversation = await Conversation.findOne({participants: {$all: [senderId, receiverId]}}).populate('messages')
+        let getConversation = await Conversation.findOne({participants: {$all: [senderId, receiverId]}}).populate('messages').populate('participants', '-password -__v')
         if(!getConversation) return res.status(404).send({message: 'No conversation found'})
         return res.status(200).send({conversation: getConversation})
     }catch(err){
@@ -53,7 +58,7 @@ export const getConversation = async (req: ExtendedRequest, res: Response, next:
 export const getAllConversations = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     try{
         const senderId = req.user._id
-        let conversations = await Conversation.find({participants: senderId}).populate('messages').populate('participants')
+        let conversations = await Conversation.find({participants: senderId}).populate('messages').populate('participants', '-password -__v')
         return res.status(200).send({conversations})
     }catch(err){
         return res.status(500).send({message: 'Error getting conversations'})

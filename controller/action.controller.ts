@@ -5,6 +5,8 @@ import { User } from "../models/user"
 
 const Like = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     const user = req.user
+    user.last_seen = new Date()
+    await user.save()
     
     const likedUserId = req.body.likedUserId
     if(!user || !likedUserId){

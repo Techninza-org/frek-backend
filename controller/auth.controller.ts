@@ -3,6 +3,7 @@ import helper from '../utils/helpers'
 import { User } from '../models/user'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
+import { ExtendedRequest } from '../utils/middleware'
 
 const signUp = async (req: Request, res: Response, next: NextFunction) => {
     const isValidPayload = helper.isValidatePaylod(req.body, ['name', 'email', 'password', 'gender', 'dob'])
@@ -55,11 +56,49 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
         const token = jwt.sign({email: user.email}, process.env.JWT_SECRET!, {
             expiresIn: '7d'
         })
+        user.last_seen = new Date()
+        await user.save()
         return res.status(200).send({valid: true, message: "Logged in successfully", user, token})
     }catch(err){
         return res.status(500).send({error: 'Error while Login'})
     }
 }
 
-const authController = {signUp, login}
+const updatePassword = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    const isValidPayload = helper.isValidatePaylod(req.body, ['oldPassword', 'newPassword'])
+    if(!isValidPayload){
+        return res.status(400).send({error: 'Invalid payload', error_message: 'oldPassword, newPassword are required'})
+    }
+    const {oldPassword, newPassword} = req.body
+    const user = req.user
+    try{
+        if(!user) return res.status(400).send({message: 'User not found'})
+        const isCorrectPassword = bcrypt.compareSync(oldPassword, user.password)
+        if(!isCorrectPassword){
+            return res.status(400).send({message: 'Incorrect old password'})
+        }
+        const hashedPassword = await bcrypt.hash(newPassword, 10)
+        user.last_seen = new Date()
+        await User.findByIdAndUpdate(user._id, {password: hashedPassword})
+        return res.status(200).send({message: 'Password updated successfully'})
+    }catch(err){
+        return res.status(500).send({message: 'Error updating password'})
+    }
+}
+
+
+const getProfileById = async (req: Request, res: Response, next: NextFunction) => {
+    try{
+        const {id} = req.params
+        let user = await User.findById(id)
+        if(!user) return res.status(404).send({message: 'User not found'})
+        user.password = undefined
+    
+        return res.status(200).send({user})
+    }catch(err){
+        return next(err)
+    }
+}
+
+const authController = {signUp, login, updatePassword, getProfileById}
 export default authController
