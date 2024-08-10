@@ -16,7 +16,7 @@ const getUserDetails = async (req: ExtendedRequest, res: Response, next: NextFun
 const updateUserDetails = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     try{
         const user = req.user
-        const {phone, bio, preference, email_notify, name, theme_color, lat, long} = req.body
+        const {phone, bio, preference, email_notify, name, theme_color, lat, long, bubble_color} = req.body
 
         if(req.file && user.avatar_updated > 4){
             return res.status(201).send({message: 'You have reached the maximum number of avatar updates'})
@@ -25,7 +25,7 @@ const updateUserDetails = async (req: ExtendedRequest, res: Response, next: Next
         if(!user) return res.status(400).send({message: 'User not found'})
             
         const updatedUser = await User.findByIdAndUpdate(user._id, {
-            phone, bio, preference, email_notify, name, theme_color, lat, long, avatar: req.file ? helper.imageUrlGen(req.file) : undefined
+            phone, bio, preference, email_notify, name, theme_color, bubble_color, lat, long, avatar: req.file ? helper.imageUrlGen(req.file) : undefined
         }, { new: true });
 
         if(req.file) {

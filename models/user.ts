@@ -24,6 +24,7 @@ const UserSchema = new Schema({
         required: false
     },
     theme_color: {type: String, default: 'default'},
+    bubble_color: {type: String, default: 'default'},
     last_seen: {type: Date, default: Date.now},
     createdAt: {type: Date, default: Date.now},
     likedBy: {type: [Schema.Types.ObjectId], required: false},
