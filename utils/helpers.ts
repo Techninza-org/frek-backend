@@ -45,7 +45,7 @@ const isValidDateFormat = (date: string) => {
 //     })
 // }
 const imageUrlGen = (filePath: any) => {
-        const gen_url = "http://45.61.60.89:3000/public/images/" + filePath.filename; 
+        const gen_url = "https://thefrekapp.com/public/images/" + filePath.filename; 
         return gen_url
 }
 const helper = { isValidatePaylod, isValidDateFormat, imageUrlGen }  //sendMail

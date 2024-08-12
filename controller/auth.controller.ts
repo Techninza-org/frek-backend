@@ -29,7 +29,7 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
             gender,
             dob: dobString,
             age,
-            avatar: "http://45.61.60.89:3000/public/images/1718965492683-default.png",
+            avatar: "https://thefrekapp.com/public/images/1718965492683-default.png",
         })
         const token = jwt.sign({email: req.body.email}, process.env.JWT_SECRET!, {
             expiresIn: '7d'
