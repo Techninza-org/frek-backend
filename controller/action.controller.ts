@@ -83,5 +83,5 @@ const dislike = async (
   }
 };
 
-const actionController = { Like };
+const actionController = { Like, dislike };
 export default actionController;
