@@ -29,7 +29,8 @@ const UserSchema = new Schema({
     createdAt: {type: Date, default: Date.now},
     likedBy: {type: [Schema.Types.ObjectId], required: false},
     matched: {type: [Schema.Types.ObjectId], required: false},
-    liked: {type: [Schema.Types.ObjectId], required: false}
+    liked: {type: [Schema.Types.ObjectId], required: false},
+    disliked: {type: [Schema.Types.ObjectId], required: false}
 })
 
 export const User = models.User || model('User', UserSchema)

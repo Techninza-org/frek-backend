@@ -111,6 +111,7 @@ const getFeed = async (req: ExtendedRequest, res: Response, next: NextFunction) 
         user.last_seen = new Date()
         await user.save()
         const users = await User.find({ _id: { $ne: req.user._id } });
+        users.filter(user => !user.matched.includes(req.user._id) && !user.liked.includes(req.user._id) && !user.disliked.includes(req.user._id))
         users.sort(() => Math.random() - 0.5)
         const feed = users.map(user => ({id: user._id, name: user.name, age: user.age, avatar: user.avatar}))
         return res.status(200).send({feed})
