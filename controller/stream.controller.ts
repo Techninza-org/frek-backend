@@ -44,11 +44,15 @@ const updateStream = async (req: ExtendedRequest, res: Response, next: NextFunct
 }
 
 const getAllStreams = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
-    const user = req.user
-    user.last_seen = new Date() 
-    await user.save()
-    const streams = await Stream.find({})
-    return res.status(200).send({streams})
+    try{
+        const user = req.user
+        user.last_seen = new Date() 
+        await user.save()
+        const streams = await Stream.find({})
+        return res.status(200).send({streams})
+    }catch(err){
+        return next(err)
+    }
 }
 
 const stopStream = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
