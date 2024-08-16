@@ -28,26 +28,23 @@ const startStream = async (req: ExtendedRequest, res: Response, next: NextFuncti
     }
 }
 
-const updateStream = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
-    try{
-        const {liveID, isHost} = req.body
-        if(!liveID ){
-            return res.status(400).send({message: 'liveID is required'})
-        }
-        if(!isHost ){
-            return res.status(400).send({message: 'isHost is required'})
-        }
-        const stream = await Stream.findOneAndUpdate({liveID: liveID}, {liveID, isHost}, {new: true})
-    }catch(err){
-        return next(err)
-    }
-}
+// const updateStream = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+//     try{
+//         const {liveID, isHost} = req.body
+//         if(!liveID ){
+//             return res.status(400).send({message: 'liveID is required'})
+//         }
+//         if(!isHost ){
+//             return res.status(400).send({message: 'isHost is required'})
+//         }
+//         const stream = await Stream.findOneAndUpdate({liveID: liveID}, {liveID, isHost}, {new: true})
+//     }catch(err){
+//         return next(err)
+//     }
+// }
 
-const getAllStreams = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+const getAllStreams = async (req: Request, res: Response, next: NextFunction) => {
     try{
-        const user = req.user
-        user.last_seen = new Date() 
-        await user.save()
         const streams = await Stream.find({})
         return res.status(200).send({streams})
     }catch(err){
@@ -74,5 +71,5 @@ const stopStream = async (req: ExtendedRequest, res: Response, next: NextFunctio
     }
 }
 
-const streamController = {startStream, updateStream, getAllStreams, stopStream}
+const streamController = {startStream, getAllStreams, stopStream}
 export default streamController
