@@ -13,17 +13,30 @@ import messageRouter from "./routes/message.routes"
 import path from "path";
 import fs from "fs";
 import streamRouter from "./routes/stream.routes";
+import { Notification } from "./models/notification";
+import * as admin from 'firebase-admin'
+import { User } from "./models/user";
 dotenv.config()
 
 const app = express()
 
-// const corsOptions = {
-//     origin: '*'
-// };
-
 app.use(cors())
 app.use(express.json())
 app.use('/public', express.static(path.join(__dirname, 'public')));
+
+
+const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT!)
+
+try {
+    admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        databaseURL: process.env.FIREBASE_DATABASE_URL,
+    })
+
+    console.log('Firebase Admin initialized successfully.')
+} catch (error) {
+    console.error('Error initializing Firebase Admin:', error)
+}
 
 export const getReceiverSocketId = (receiverId: string) => {
     return userSocketMap[receiverId]
@@ -46,6 +59,47 @@ app.use('/action', middleware.AuthMiddleware, actionRouter)
 app.use('/message', middleware.AuthMiddleware, messageRouter)
 
 app.use('/stream', streamRouter)
+
+export const sendNotif = async (
+    senderId: number,
+    receiverId: number,
+    senderProfile: string,
+    title: string,
+    message: string
+) => {
+    const notif = await Notification.create({
+        data: {
+            sender_id: senderId,
+            receiver_id: receiverId,
+            sender_profile: senderProfile,
+            title,
+            message,
+        },
+    })
+}
+
+export const sendNotification = async (registrationToken: string, payload: { title: string; body: string }) => {
+    try {
+        const message = {
+            token: registrationToken,
+            notification: {
+                title: payload.title,
+                body: payload.body,
+            },
+        }
+
+        const response = await admin.messaging().send(message)
+        console.log('Successfully sent message:', response)
+        return response
+    } catch (error) {
+        console.error('Error sending message:', error)
+    }
+}
+
+export const getUserToken = async (userId: any) => {
+    const user = await User.findById({ where: { id: userId }, select: { registrationToken: true } })
+    return user ? user.registrationToken : null
+}
 
 mongoose.connect(process.env.MONGO_URI!)
     .then(() => console.log('db connected...'))
