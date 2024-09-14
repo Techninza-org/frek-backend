@@ -39,38 +39,38 @@ const Like = async (
       await user.save();
       likedUser.liked.pull(user._id);
       await likedUser.save();
-      sendNotif(user.id, Number(likedUserId), user.profilePic, 'New Like', `${user.name} has liked you`)
-        const receiverToken = await getUserToken(likedUserId);
-        console.log('Receiver Token:', receiverToken);
-        if (!receiverToken) {
-            console.log('Receiver not found or has no registration token', likedUserId);
-        } else {
-            const payload = {
-                title: 'New Message',
-                body: `${req.user.username} has sent you a message!`
-            };
-            await sendNotification(receiverToken, payload);
-            console.log('Notification sent to receiver');
-        }
+      // sendNotif(user.id, Number(likedUserId), user.profilePic, 'New Like', `${user.name} has liked you`)
+      //   const receiverToken = await getUserToken(likedUserId);
+      //   console.log('Receiver Token:', receiverToken);
+      //   if (!receiverToken) {
+      //       console.log('Receiver not found or has no registration token', likedUserId);
+      //   } else {
+      //       const payload = {
+      //           title: 'New Message',
+      //           body: `${req.user.username} has sent you a message!`
+      //       };
+      //       await sendNotification(receiverToken, payload);
+      //       console.log('Notification sent to receiver');
+      //   }
       return res.status(200).send({ message: "It is a match" });
     } else {
       likedUser.likedBy.push(user._id);
       await likedUser.save();
       user.liked.push(likedUserId);
       await user.save();
-      sendNotif(user.id, Number(likedUserId), user.profilePic, 'New Like', `${user.name} has liked you`)
-        const receiverToken = await getUserToken(likedUserId);
-        console.log('Receiver Token:', receiverToken);
-        if (!receiverToken) {
-            console.log('Receiver not found or has no registration token', likedUserId);
-        } else {
-            const payload = {
-                title: 'New Message',
-                body: `${req.user.username} has sent you a message!`
-            };
-            await sendNotification(receiverToken, payload);
-            console.log('Notification sent to receiver');
-        }
+      // sendNotif(user.id, Number(likedUserId), user.profilePic, 'New Like', `${user.name} has liked you`)
+      //   const receiverToken = await getUserToken(likedUserId);
+      //   console.log('Receiver Token:', receiverToken);
+      //   if (!receiverToken) {
+      //       console.log('Receiver not found or has no registration token', likedUserId);
+      //   } else {
+      //       const payload = {
+      //           title: 'New Message',
+      //           body: `${req.user.username} has sent you a message!`
+      //       };
+      //       await sendNotification(receiverToken, payload);
+      //       console.log('Notification sent to receiver');
+      //   }
     }
     return res.status(200).send({ message: "User liked successfully" });
   } catch (err) {

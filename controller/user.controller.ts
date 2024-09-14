@@ -2,6 +2,7 @@ import { Response, NextFunction } from "express"
 import { ExtendedRequest } from "../utils/middleware"
 import { User } from "../models/user"
 import helper from "../utils/helpers"
+import { Notification } from "../models/notification"
 
 const getUserDetails = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     //update last seen 
@@ -134,5 +135,18 @@ const getMatchedUsers = async (req: ExtendedRequest, res: Response, next: NextFu
     }
 }
 
-const userController = {getUserDetails, signupQuestions, updateUserDetails, deleteUser, getFeed, getMatchedUsers, uploadPics}
+const getNotifications = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    try{
+        const user = req.user
+        if(!user) return res.status(400).send({message: 'User not found'})
+        user.last_seen = new Date()
+        await user.save()
+        const notifs = await Notification.find({receiver_id: user._id}).sort({createdAt: -1})
+        return res.status(200).send({notifications: notifs})
+    }catch(err){
+        return res.status(400).send({message: 'Error fetching notifications'})
+    }
+}
+
+const userController = {getUserDetails, signupQuestions, updateUserDetails, deleteUser, getFeed, getMatchedUsers, uploadPics, getNotifications}
 export default userController

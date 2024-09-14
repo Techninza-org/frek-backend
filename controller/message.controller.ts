@@ -31,19 +31,19 @@ export const sendMessage = async (req: ExtendedRequest, res: Response, next: Nex
         //     io.emit('newMessage', {message: newMessage})
         // }
         io.emit('newMessage', {message: newMessage})
-        sendNotif(senderId, Number(receiverId), user.profilePic, 'New Message', `${user.name} has sent you a message`)
-        const receiverToken = await getUserToken(receiverId);
-        console.log('Receiver Token:', receiverToken);
-        if (!receiverToken) {
-            console.log('Receiver not found or has no registration token', receiverId);
-        } else {
-            const payload = {
-                title: 'New Message',
-                body: `${req.user.username} has sent you a message!`
-            };
-            await sendNotification(receiverToken, payload);
-            console.log('Notification sent to receiver');
-        }
+        // sendNotif(senderId, Number(receiverId), user.profilePic, 'New Message', `${user.name} has sent you a message`)
+        // const receiverToken = await getUserToken(receiverId);
+        // console.log('Receiver Token:', receiverToken);
+        // if (!receiverToken) {
+        //     console.log('Receiver not found or has no registration token', receiverId);
+        // } else {
+        //     const payload = {
+        //         title: 'New Message',
+        //         body: `${req.user.username} has sent you a message!`
+        //     };
+        //     await sendNotification(receiverToken, payload);
+        //     console.log('Notification sent to receiver');
+        // }
 
         return res.status(200).send({message: 'Message sent'})
     }catch(err){
