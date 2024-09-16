@@ -120,7 +120,7 @@ export const sendNotification = async (registrationToken: string, payload: { tit
 
 export const getUserToken = async (userId: any) => {
     console.log('Getting user token:', userId);
-    const user = await User.findById({ where: { _id: userId }, select: { registrationToken: true } })
+    const user = await User.findById(userId).select('registrationToken');
     console.log('User registration token:', user.registrationToken);
     if(!user) return null
     if(!user.registrationToken) return null
