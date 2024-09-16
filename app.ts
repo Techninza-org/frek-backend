@@ -67,16 +67,21 @@ export const sendNotif = async (
     title: string,
     message: string
 ) => {
-    const notif = await Notification.create({
-        data: {
+    try {
+        const notif = await Notification.create({
             sender_id: senderId,
             receiver_id: receiverId,
             sender_profile: senderProfile,
-            title,
-            message,
-        },
-    })
-}
+            title: title,
+            message: message,
+        });
+
+        console.log('Notification created:', notif);
+    } catch (error) {
+        console.error('Error creating notification:', error);
+    }
+};
+
 
 export const sendNotification = async (registrationToken: string, payload: { title: string; body: string }) => {
     try {
