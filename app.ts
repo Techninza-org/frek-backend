@@ -119,8 +119,13 @@ export const sendNotification = async (registrationToken: string, payload: { tit
 }
 
 export const getUserToken = async (userId: any) => {
-    const user = await User.findById({ where: { id: userId }, select: { registrationToken: true } })
-    return user ? user.registrationToken : null
+    console.log('Getting user token:', userId);
+    const user = await User.findById({ where: { _id: userId }, select: { registrationToken: true } })
+    console.log('User registration token:', user.registrationToken);
+    if(!user) return null
+    if(!user.registrationToken) return null
+    
+    return user.registrationToken 
 }
 
 mongoose.connect(process.env.MONGO_URI!)
