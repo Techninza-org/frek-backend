@@ -11,6 +11,7 @@ import middleware from "./utils/middleware"
 import actionRouter from "./routes/action.routes"
 import messageRouter from "./routes/message.routes"
 import path from "path";
+import { Stripe } from "stripe"
 import fs from "fs";
 import streamRouter from "./routes/stream.routes";
 import { Notification } from "./models/notification";
@@ -38,6 +39,8 @@ try {
     console.error('Error initializing Firebase Admin:', error)
 }
 
+const stripe = new Stripe('sk_test_51PzcN8P42SraKXdKdAD7cqNY3OT84LAArOn8PcwOKvN7Sv7Lwk4I3BREqVwpPFJkLIqOUVC4o5m1UgRslnjZaSmc00Zln9LoDQ');
+
 export const getReceiverSocketId = (receiverId: string) => {
     return userSocketMap[receiverId]
 }
@@ -47,6 +50,20 @@ const userSocketMap: { [key: string]: string } = {};
 app.get('/ping', (req, res) => {
     return res.status(200).send({message: 'pong'})
 })
+
+app.post('/create-payment-intent', async (req, res) => {
+    const { amount, currency } = req.body;
+    try {
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount, 
+            currency,
+        });
+
+        res.json({ clientSecret: paymentIntent.client_secret });
+    } catch (error: any) {
+        res.status(500).send({ error: error.message });
+    }
+});
 
 app.get('/', (req, res) => res.send('Server running...'))
 
@@ -61,8 +78,8 @@ app.use('/message', middleware.AuthMiddleware, messageRouter)
 app.use('/stream', streamRouter)
 
 export const sendNotif = async (
-    senderId: number,
-    receiverId: number,
+    senderId: string,
+    receiverId: string,
     senderProfile: string,
     title: string,
     message: string

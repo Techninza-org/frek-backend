@@ -39,7 +39,7 @@ const Like = async (
       await user.save();
       likedUser.liked.pull(user._id);
       await likedUser.save();
-      sendNotif(user.id, Number(likedUserId), user.avatar, 'New Match', `You have matched with ${user.name}`)
+      sendNotif(user.id, likedUserId, user.avatar || '', 'New Match', `You have matched with ${user.name}`)
         const receiverToken = await getUserToken(likedUserId);
         console.log('Receiver Token:', receiverToken);
         if (!receiverToken) {
@@ -58,7 +58,7 @@ const Like = async (
       await likedUser.save();
       user.liked.push(likedUserId);
       await user.save();
-      sendNotif(user.id, Number(likedUserId), user.avatar, 'New Like', `${user.name} has liked you`)
+      sendNotif(user.id, likedUserId, user.avatar, 'New Like', `${user.name} has liked you`)
         const receiverToken = await getUserToken(likedUserId);
         console.log('Receiver Token:', receiverToken);
         if (!receiverToken) {
