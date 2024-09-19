@@ -148,5 +148,27 @@ const getNotifications = async (req: ExtendedRequest, res: Response, next: NextF
     }
 }
 
-const userController = {getUserDetails, signupQuestions, updateUserDetails, deleteUser, getFeed, getMatchedUsers, uploadPics, getNotifications}
+const markAsRead = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    try{
+        const user = req.user
+        if(!user) return res.status(400).send({message: 'User not found'})
+        const notif = await Notification.findByIdAndUpdate(req.params.id, {isRead: true}, {new: true})
+        return res.status(200).send({message: 'Notification marked as read', notification: notif})
+    }catch(err){
+        return res.status(400).send({message: 'Error marking notification as read'})
+    }
+}
+
+const deleteNotification = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    try{
+        const user = req.user
+        if(!user) return res.status(400).send({message: 'User not found'})
+        const notif = await Notification.findByIdAndDelete(req.params.id)
+        return res.status(200).send({message: 'Notification deleted', notification: notif})
+    }catch(err){
+        return res.status(400).send({message: 'Error deleting notification'})
+    }
+}
+
+const userController = {getUserDetails, signupQuestions, updateUserDetails, deleteUser, getFeed, getMatchedUsers, uploadPics, getNotifications, markAsRead, deleteNotification}
 export default userController

@@ -20,5 +20,11 @@ userRouter.put('/questions', userController.signupQuestions)
 userRouter.put('/pics', upload.array("files", 3), userController.uploadPics)
 //@ts-ignore
 userRouter.delete('/', userController.deleteUser)
+//@ts-ignore
+userRouter.get('/notifications', userController.getNotifications)
+//@ts-ignore
+userRouter.put('/notifications/:id', userController.markAsRead)
+//@ts-ignore
+userRouter.delete('/notifications/:id', userController.deleteNotification)
 
 export default userRouter
