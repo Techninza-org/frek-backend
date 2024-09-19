@@ -152,6 +152,8 @@ const markAsRead = async (req: ExtendedRequest, res: Response, next: NextFunctio
     try{
         const user = req.user
         if(!user) return res.status(400).send({message: 'User not found'})
+        const isNotif = await Notification.findById(req.params.id)
+        if(!isNotif) return res.status(400).send({message: 'Notification not found'})
         const notif = await Notification.findByIdAndUpdate(req.params.id, {isRead: true}, {new: true})
         return res.status(200).send({message: 'Notification marked as read', notification: notif})
     }catch(err){
@@ -163,6 +165,8 @@ const deleteNotification = async (req: ExtendedRequest, res: Response, next: Nex
     try{
         const user = req.user
         if(!user) return res.status(400).send({message: 'User not found'})
+        const isNotif = await Notification.findById(req.params.id)
+        if(!isNotif) return res.status(400).send({message: 'Notification not found'})
         const notif = await Notification.findByIdAndDelete(req.params.id)
         return res.status(200).send({message: 'Notification deleted', notification: notif})
     }catch(err){
