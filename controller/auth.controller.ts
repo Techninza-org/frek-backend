@@ -4,6 +4,7 @@ import { User } from '../models/user'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { ExtendedRequest } from '../utils/middleware'
+import { getUserToken, sendNotif, sendNotification } from '../app'
 
 const signUp = async (req: Request, res: Response, next: NextFunction) => {
     const isValidPayload = helper.isValidatePaylod(req.body, ['name', 'email', 'password', 'gender', 'dob'])
@@ -58,6 +59,19 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
         })
         user.last_seen = new Date()
         await user.save()
+        sendNotif(user.id, user.id, user.avatar || '', 'Welcome', `Welcome to Frek App, ${user.name}`)
+        const receiverToken = await getUserToken(user.id);
+        console.log('Receiver Token:', receiverToken);
+        if (!receiverToken) {
+            console.log('Receiver not found or has no registration token', user.id);
+        } else {
+            const payload = {
+                title: 'Welcome',
+                body: `Welcome to Frek App, ${user.username}!`
+            };
+            await sendNotification(receiverToken, payload);
+            console.log('Notification sent to receiver');
+        }
         return res.status(200).send({valid: true, message: "Logged in successfully", user, token})
     }catch(err){
         return res.status(500).send({error: 'Error while Login'})
