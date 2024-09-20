@@ -11,4 +11,6 @@ authRouter.put('/change-password', middleware.AuthMiddleware, authController.upd
 
 authRouter.get('/profile/:id', authController.getProfileById)
 
+authRouter.post('/social-login', authController.socialLogin)
+
 export default authRouter

@@ -78,6 +78,37 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     }
 }
 
+const socialLogin = async (req: Request, res: Response, next: NextFunction) => {
+    const isValidPayload = helper.isValidatePaylod(req.body, ['name', 'email', 'type'])
+    if(!isValidPayload){
+        return res.status(400).send({error: 'Invalid payload', error_message: 'name, email and type are required'})
+    }
+    const {name, email, type} = req.body
+
+    try{
+        const user = await User.findOne({email, type})
+        if(!user){
+            const newUser = await User.create({
+                name,
+                email,
+                type
+            })
+            const token = jwt.sign({email: newUser.email}, process.env.JWT_SECRET!, {
+                expiresIn: '7d'
+            })
+            return res.status(200).send({valid: true, message: 'User created successfully', user: newUser, token})
+        }
+        const token = jwt.sign({email: user.email}, process.env.JWT_SECRET!, {
+            expiresIn: '7d'
+        })
+        user.last_seen = new Date()
+        await user.save()
+        return res.status(200).send({valid: true, message: 'Logged in successfully', user, token})
+    }catch(err){
+        console.log(err); 
+    }   
+}
+
 const updatePassword = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     const isValidPayload = helper.isValidatePaylod(req.body, ['oldPassword', 'newPassword'])
     if(!isValidPayload){
@@ -114,5 +145,5 @@ const getProfileById = async (req: Request, res: Response, next: NextFunction) =
     }
 }
 
-const authController = {signUp, login, updatePassword, getProfileById}
+const authController = {signUp, login, updatePassword, getProfileById, socialLogin}
 export default authController
