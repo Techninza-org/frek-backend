@@ -58,15 +58,15 @@ const Like = async (
       await likedUser.save();
       user.liked.push(likedUserId);
       await user.save();
-      sendNotif(user.id, likedUserId, user.avatar, 'New Like', `${user.name} has liked you`)
+      sendNotif(user.id, likedUserId, user.avatar, 'New Like', `Someone has liked you`)
         const receiverToken = await getUserToken(likedUserId);
         console.log('Receiver Token:', receiverToken);
         if (!receiverToken) {
             console.log('Receiver not found or has no registration token', likedUserId);
         } else {
             const payload = {
-                title: 'New Message',
-                body: `${req.user.username} has liked you!`
+                title: 'New Like',
+                body: `Someone has liked you!`
             };
             await sendNotification(receiverToken, payload);
             console.log('Notification sent to receiver');
