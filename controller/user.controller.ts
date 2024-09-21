@@ -3,6 +3,7 @@ import { ExtendedRequest } from "../utils/middleware"
 import { User } from "../models/user"
 import helper from "../utils/helpers"
 import { Notification } from "../models/notification"
+import { Payment } from "../models/payment"
 
 const getUserDetails = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     //update last seen 
@@ -176,5 +177,29 @@ const deleteNotification = async (req: ExtendedRequest, res: Response, next: Nex
     }
 }
 
-const userController = {getUserDetails, signupQuestions, updateUserDetails, deleteUser, getFeed, getMatchedUsers, uploadPics, getNotifications, markAsRead, deleteNotification}
+const addPayment = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    try{
+        const user = req.user
+        const {amount, status, paymentId} = req.body
+        if(!user) return res.status(400).send({message: 'User not found'})
+        const payment = await Payment.create({user: user._id, amount, status, paymentId})
+        return res.status(200).send({message: 'Payment added successfully', payment})
+    }catch(err){
+        console.log(err);
+        return res.status(400).send({message: 'Error adding payment'})
+    }
+}
+
+const paymentHistory = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    try{
+        const user = req.user
+        if(!user) return res.status(400).send({message: 'User not found'})
+        const payments = await Payment.find({user: user._id}).sort({createdAt: -1})
+        return res.status(200).send({payments})
+    }catch(err){
+        return res.status(400).send({message: 'Error fetching payment history'})
+    }
+}
+
+const userController = {getUserDetails, signupQuestions, updateUserDetails, deleteUser, getFeed, getMatchedUsers, uploadPics, getNotifications, markAsRead, deleteNotification, addPayment, paymentHistory}
 export default userController

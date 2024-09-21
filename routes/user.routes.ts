@@ -26,5 +26,9 @@ userRouter.get('/notifications', userController.getNotifications)
 userRouter.put('/notifications', userController.markAsRead)
 //@ts-ignore
 userRouter.delete('/notifications', userController.deleteNotification)
+//@ts-ignore
+userRouter.post('/payment', userController.addPayment)
+//@ts-ignore
+userRouter.get('/payment-history', userController.paymentHistory)
 
 export default userRouter
