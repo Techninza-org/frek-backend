@@ -23,9 +23,9 @@ userRouter.delete('/', userController.deleteUser)
 //@ts-ignore
 userRouter.get('/notifications', userController.getNotifications)
 //@ts-ignore
-userRouter.put('/notifications', userController.markAsRead)
+userRouter.put('/notifications/:id', userController.markAsRead)
 //@ts-ignore
-userRouter.delete('/notifications', userController.deleteNotification)
+userRouter.delete('/notifications/:id', userController.deleteNotification)
 //@ts-ignore
 userRouter.post('/payment', userController.addPayment)
 //@ts-ignore

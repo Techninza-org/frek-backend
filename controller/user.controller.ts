@@ -152,7 +152,8 @@ const getNotifications = async (req: ExtendedRequest, res: Response, next: NextF
 const markAsRead = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     try{
         const user = req.user
-        const id = Number(req.body.id)
+        const id = req.params.id
+        if (!id) return res.status(400).send({message: 'Notification id is required'})
         if(!user) return res.status(400).send({message: 'User not found'})
         const isNotif = await Notification.findById(id)
         if(!isNotif) return res.status(400).send({message: 'Notification not found'})
@@ -166,7 +167,8 @@ const markAsRead = async (req: ExtendedRequest, res: Response, next: NextFunctio
 const deleteNotification = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     try{
         const user = req.user
-        const id = Number(req.body.id)
+        const id = req.params.id
+        if(!id) return res.status(400).send({message: 'Notification id is required'})
         if(!user) return res.status(400).send({message: 'User not found'})
         const isNotif = await Notification.findById(id)
         if(!isNotif) return res.status(400).send({message: 'Notification not found'})
