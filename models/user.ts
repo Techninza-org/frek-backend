@@ -19,7 +19,7 @@ const UserSchema = new Schema({
     signup_questions: {
         type: [{
             question: {type: String, required: false},
-            answer: {type: Boolean, required: false}
+            answer: {type: String, required: false}
         }], 
         required: false
     },
