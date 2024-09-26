@@ -57,7 +57,7 @@ const stopStream = async (req: ExtendedRequest, res: Response, next: NextFunctio
         const user = req.user
         user.last_seen = new Date()
         await user.save()
-        const {liveID} = req.body
+        const {liveID} = req.params
         if(!liveID ){
             return res.status(400).send({message: 'liveID is required'})
         }
