@@ -46,12 +46,12 @@ const updateUserDetails = async (req: ExtendedRequest, res: Response, next: Next
 }
 
 const signupQuestions = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    try{
     const user = req.user
-    const isValidPayload = helper.isValidatePaylod(req.body, ['questions'])
-    if(!isValidPayload){
-        return res.status(400).send({error: 'Invalid payload', error_message: 'questions are required'})
-    }
     const {questions} = req.body
+    if(!questions) {
+        return res.status(400).send({message: 'Questions required'})
+    }
     try{
         if(!user){
             return res.status(400).send({message: 'User not found'})
@@ -63,6 +63,10 @@ const signupQuestions = async (req: ExtendedRequest, res: Response, next: NextFu
         return res.status(200).send({message: 'Questions added successfully', updatedQuestions})
     }catch(err){
         return res.status(500).send({message: 'Error adding questions'})
+    }
+    }
+    catch(err){
+        return next(err)
     }
 }
 

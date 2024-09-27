@@ -10,6 +10,6 @@ streamRouter.post('/', middleware.AuthMiddleware, streamController.startStream)
 streamRouter.get('/', streamController.getAllStreams)
 
 //@ts-ignore
-streamRouter.delete('/', middleware.AuthMiddleware, streamController.stopStream)
+streamRouter.delete('/:liveID', middleware.AuthMiddleware, streamController.stopStream)
 
 export default streamRouter
