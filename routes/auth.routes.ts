@@ -13,4 +13,8 @@ authRouter.get('/profile/:id', authController.getProfileById)
 
 authRouter.post('/social-login', authController.socialLogin)
 
+authRouter.post('/send-otp', authController.SendOtp)
+authRouter.post('/verify-otp', authController.VerifyOtp)
+authRouter.post('/reset-password', authController.resetPassword)
+
 export default authRouter
