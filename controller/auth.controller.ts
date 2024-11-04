@@ -180,13 +180,22 @@ const VerifyOtp = async (req: Request, res: Response, _next: NextFunction) => {
         }
 
         const { email, otp } = req.body;
+        
+        if (!Number.isInteger(otp)) {
+            return res.status(400).send({
+                status: 400,
+                error: 'Bad Request',
+                error_description: 'Invalid Otp, OTP must be a number',
+            });
+        }
         const user = await User.findOne({ email });
 
         if (!user) {
             return res.status(400).send({ status: 404, error: 'Not found', error_description: 'User not found' });
         }
 
-        if (user.otp === otp) {
+
+        if (user.otp === Number(otp)) {
             await User.findOneAndUpdate(
                 { email },
                 { $unset: { otp: "" } },
