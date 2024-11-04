@@ -30,5 +30,7 @@ userRouter.delete('/notifications/:id', userController.deleteNotification)
 userRouter.post('/payment', userController.addPayment)
 //@ts-ignore
 userRouter.get('/payment-history', userController.paymentHistory)
+//@ts-ignore
+userRouter.put('/block/:id', userController.blockUserById)
 
 export default userRouter
