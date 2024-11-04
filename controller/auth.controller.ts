@@ -145,5 +145,91 @@ const getProfileById = async (req: Request, res: Response, next: NextFunction) =
     }
 }
 
-const authController = {signUp, login, updatePassword, getProfileById, socialLogin}
+const SendOtp = async (req: Request, res: Response, _next: NextFunction) => {
+    try {
+        if (!helper.isValidatePaylod(req.body, ['email'])) {
+            return res.status(400).send({ status: 400, error: 'Invalid Payload', error_description: 'Email requried' })
+        }
+        const { email } = req.body
+        const otp = Math.floor(100000 + Math.random() * 900000)
+        const user = await User.findOne({email})
+
+        if (!user) return res.status(400).send({ status: 404, error: 'Not found', error_description: 'user not found' })
+
+        try {
+            await User.findOneAndUpdate(
+                { email },
+                { otp },
+                { new: true } 
+            );
+
+            helper.sendMail(email, 'The Frek App Account Verification', `Your OTP is ${otp}`);
+            return res.status(200).send({ status: 200, message: 'OTP sent successfully' });
+        } catch (err) {
+            return _next(err);
+        }
+    } catch (err) {
+        return _next(err)
+    }
+}
+
+const VerifyOtp = async (req: Request, res: Response, _next: NextFunction) => {
+    try {
+        if (!helper.isValidatePaylod(req.body, ['email', 'otp'])) {
+            return res.status(400).send({ status: 400, error: 'Invalid Payload', error_description: 'Email and OTP are required' });
+        }
+
+        const { email, otp } = req.body;
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(400).send({ status: 404, error: 'Not found', error_description: 'User not found' });
+        }
+
+        if (user.otp === otp) {
+            await User.findOneAndUpdate(
+                { email },
+                { $unset: { otp: "" } },
+                { new: true }
+            );
+
+            return res.status(200).send({ status: 200, message: 'OTP verified successfully' });
+        } else {
+            return res.status(400).send({ status: 400, error: 'Invalid OTP', error_description: 'The OTP provided is incorrect' });
+        }
+    } catch (err) {
+        return _next(err);
+    }
+};
+
+const resetPassword = async (req: Request, res: Response, next: NextFunction) => {
+    // Validate payload to ensure required fields are present
+    const isValidPayload = helper.isValidatePaylod(req.body, ['email', 'password']);
+    if (!isValidPayload) {
+        return res.status(400).send({ error: 'Invalid payload', error_message: 'Email and password are required' });
+    }
+
+    const { email, password } = req.body;
+
+    try {
+        // Find the user by email
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).send({ message: 'User not found' });
+        }
+
+        // Hash the new password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Update the user's password and last_seen timestamp
+        await User.findByIdAndUpdate(user._id, { password: hashedPassword, last_seen: new Date() });
+
+        return res.status(200).send({ message: 'Password reset successfully' });
+    } catch (err) {
+        return res.status(500).send({ message: 'Error resetting password' });
+    }
+};
+
+
+const authController = {signUp, login, updatePassword, getProfileById, socialLogin, SendOtp, VerifyOtp, resetPassword}
 export default authController

@@ -32,7 +32,8 @@ const UserSchema = new Schema({
     liked: {type: [Schema.Types.ObjectId], required: false},
     disliked: {type: [Schema.Types.ObjectId], required: false},
     registrationToken: {type: String, required: false},
-    type: {type: String, required: false}
+    type: {type: String, required: false},
+    otp: {type: Number, required: false},
 })
 
 export const User = models.User || model('User', UserSchema)

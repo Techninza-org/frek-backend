@@ -1,4 +1,4 @@
-// import nodemailer from 'nodemailer'
+import nodemailer from 'nodemailer'
 
 const isValidatePaylod = (body: any, fields: string[]): boolean => {
     if (!body) {
@@ -29,25 +29,26 @@ const isValidDateFormat = (date: string) => {
     return true
 }
 
-// const transporter = nodemailer.createTransport({
-//     service: 'gmail',
-//     auth: {
-//         user: process.env.GMAIL_APP_EMAIL!,
-//         pass: process.env.GMAIL_APP_PASSWORD!,
-//     },
-// })
-// const sendMail = (to: string, subject: string, body: string) => {
-//     transporter.sendMail({
-//         from: process.env.GMAIL_APP_EMAIL!,
-//         to: to,
-//         subject: subject,
-//         text: body,
-//     })
-// }
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.GMAIL_APP_EMAIL!,
+        pass: process.env.GMAIL_APP_PASSWORD!,
+    },
+})
+const sendMail = (to: string, subject: string, body: string) => {
+    transporter.sendMail({
+        from: process.env.GMAIL_APP_EMAIL!,
+        to: to,
+        subject: subject,
+        text: body,
+    })
+}
+
 const imageUrlGen = (filePath: any) => {
         const gen_url = "https://thefrekapp.com/public/images/" + filePath.filename; 
         return gen_url
 }
-const helper = { isValidatePaylod, isValidDateFormat, imageUrlGen }  //sendMail
+const helper = { isValidatePaylod, isValidDateFormat, imageUrlGen, sendMail }  
 export default helper
 
