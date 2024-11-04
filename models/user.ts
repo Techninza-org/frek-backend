@@ -34,6 +34,7 @@ const UserSchema = new Schema({
     registrationToken: {type: String, required: false},
     type: {type: String, required: false},
     otp: {type: Number, required: false},
+    blocked: {type: [Schema.Types.ObjectId], required: false},
 })
 
 export const User = models.User || model('User', UserSchema)

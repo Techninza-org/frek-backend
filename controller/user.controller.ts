@@ -207,5 +207,24 @@ const paymentHistory = async (req: ExtendedRequest, res: Response, next: NextFun
     }
 }
 
-const userController = {getUserDetails, signupQuestions, updateUserDetails, deleteUser, getFeed, getMatchedUsers, uploadPics, getNotifications, markAsRead, deleteNotification, addPayment, paymentHistory}
+const blockUserById = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    try{
+        const user = req.user
+        const {id} = req.params
+        if(!id) return res.status(400).send({message: 'User id is required'})
+        if(!user) return res.status(400).send({message: 'User not found'})
+        const userToBlock = await User.findById(id)
+        if(!userToBlock) return res.status(400).send({message: 'User to block not found'})
+        if(user.blocked.includes(userToBlock._id)){
+            return res.status(400).send({message: 'User already blocked'})
+        }
+        user.blocked.push(userToBlock._id)
+        await user.save()
+        return res.status(200).send({message: 'User blocked successfully', user})
+    }catch(err){
+        return res.status(400).send({message: 'Error blocking user'})
+    }
+}
+
+const userController = {getUserDetails, signupQuestions, updateUserDetails, deleteUser, getFeed, getMatchedUsers, uploadPics, getNotifications, markAsRead, deleteNotification, addPayment, paymentHistory, blockUserById}
 export default userController
