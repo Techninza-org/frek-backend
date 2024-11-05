@@ -310,6 +310,23 @@ const buySuperLikes = async (req: ExtendedRequest, res: Response, next: NextFunc
     }
 }
 
+const getSuperlikeOffers = async (
+    req: ExtendedRequest,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const offers = [
+        { id: 1, superlikes: 4000, price: 30 },
+        { id: 2, superlikes: 6000, price: 50 },
+        { id: 3, superlikes: 9000, price: 80 },
+      ];
+      return res.status(200).send({ message: "Superlike offers", offers });
+    } catch (err) {
+      return next(err);
+    }
+  };
 
-const userController = {getUserDetails, signupQuestions, updateUserDetails, deleteUser, getFeed, getMatchedUsers, uploadPics, getNotifications, markAsRead, deleteNotification, addPayment, paymentHistory, blockUserById, sendSuperLike, getWalletTransactionByDate, buySuperLikes}
+
+const userController = {getUserDetails, signupQuestions, updateUserDetails, deleteUser, getFeed, getMatchedUsers, uploadPics, getNotifications, markAsRead, deleteNotification, addPayment, paymentHistory, blockUserById, sendSuperLike, getWalletTransactionByDate, buySuperLikes, getSuperlikeOffers}
 export default userController

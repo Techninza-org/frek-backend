@@ -128,22 +128,5 @@ const dislike = async (
   }
 };
 
-const getSuperlikeOffers = async (
-  req: ExtendedRequest,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const offers = [
-      { id: 1, superlikes: 4000, price: 30 },
-      { id: 2, superlikes: 6000, price: 50 },
-      { id: 3, superlikes: 9000, price: 80 },
-    ];
-    return res.status(200).send({ message: "Superlike offers", offers });
-  } catch (err) {
-    return next(err);
-  }
-};
-
-const actionController = { Like, dislike, getSuperlikeOffers };
+const actionController = { Like, dislike };
 export default actionController;
