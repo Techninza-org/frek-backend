@@ -40,5 +40,7 @@ userRouter.get('/transactions', userController.getWalletTransactionByDate)
 userRouter.post('/buy-superlikes', userController.buySuperLikes)
 //@ts-ignore
 userRouter.get('/superlike-offers', userController.getSuperlikeOffers)
+//@ts-ignore
+userRouter.post('update-preferences', userController.updatePreferences)
 
 export default userRouter

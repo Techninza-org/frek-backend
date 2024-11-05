@@ -11,6 +11,14 @@ const UserSchema = new Schema({
     phone: {type: Number, required: false},
     bio: {type: String, required: false},
     preference: {type: String, required: false},
+    preferences: {
+        type: [{
+            minAge: {type: Number, required: false},
+            maxAge: {type: Number, required: false},
+            gender: {type: String, required: false},
+            area: {type: String, required: false},
+        }]
+    },
     email_notify: {type: Boolean, default: false},
     lat: {type: String, required: false},
     long: {type: String, required: false},

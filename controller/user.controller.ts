@@ -327,6 +327,25 @@ const getSuperlikeOffers = async (
     }
   };
 
+const updatePreferences = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    try {
+        const user = req.user;
+        const { minAge, maxAge, gender, area } = req.body;
 
-const userController = {getUserDetails, signupQuestions, updateUserDetails, deleteUser, getFeed, getMatchedUsers, uploadPics, getNotifications, markAsRead, deleteNotification, addPayment, paymentHistory, blockUserById, sendSuperLike, getWalletTransactionByDate, buySuperLikes, getSuperlikeOffers}
+        user.preferences = [{
+            minAge: minAge || user.preferences[0].minAge,
+            maxAge: maxAge || user.preferences[0].maxAge,
+            gender: gender || user.preferences[0].gender,
+            area: area || user.preferences[0].area,
+        }];
+
+        await user.save();
+
+        return res.status(200).send({ message: 'Preferences updated successfully', preferences: user.preferences });
+    } catch (err) {
+        return res.status(400).send({ message: 'Error updating preferences' });
+    }
+}
+
+const userController = {getUserDetails, signupQuestions, updateUserDetails, deleteUser, getFeed, getMatchedUsers, uploadPics, getNotifications, markAsRead, deleteNotification, addPayment, paymentHistory, blockUserById, sendSuperLike, getWalletTransactionByDate, buySuperLikes, getSuperlikeOffers, updatePreferences}
 export default userController
