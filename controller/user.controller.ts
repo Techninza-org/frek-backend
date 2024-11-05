@@ -244,7 +244,7 @@ const sendSuperLike = async (req: ExtendedRequest, res: Response, next: NextFunc
         }
 
         if (sender.boughtSuperLikesBalance < superlikeCount) {
-            return res.status(400).json({ message: 'Insufficient superlike balance.' });
+            return res.status(400).json({error: 'Insufficient balance', message: 'Insufficient superlike balance.' });
         }
 
         // Deduct superlike balance from the sender
@@ -265,9 +265,9 @@ const sendSuperLike = async (req: ExtendedRequest, res: Response, next: NextFunc
             dateSent: new Date(),
         });
 
-        res.status(200).json({ message: `${superlikeCount} superlikes sent to ${receiver.name}.`, transaction: walletTransaction });
+        res.status(200).json({status: 200, message: `${superlikeCount} superlikes sent to ${receiver.name}.`, transaction: walletTransaction });
     } catch (error) {
-        res.status(500).json({ message: 'Failed to send superlikes.', error });
+        res.status(500).json({ status: 500, message: 'Failed to send superlikes.', error });
     }
 };
 
