@@ -36,5 +36,7 @@ userRouter.put('/block/:id', userController.blockUserById)
 userRouter.post('/superlike', userController.sendSuperLike)
 //@ts-ignore
 userRouter.get('/transactions', userController.getWalletTransactionByDate)
+//@ts-ignore
+userRouter.post('/buy-superlikes', userController.buySuperLikes)
 
 export default userRouter
