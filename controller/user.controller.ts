@@ -319,7 +319,11 @@ const getWalletTransactionByDate = async (req: ExtendedRequest, res: Response, n
 
 
 const buySuperLikes = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
-    const { superlikeCount } = req.body;
+    const { superlikeCount, cost } = req.body;
+    
+    if(!superlikeCount || !cost) {
+        return res.status(400).json({ message: 'Superlike count and cost are required.' });
+    }
 
     try {
         const user = req.user;
