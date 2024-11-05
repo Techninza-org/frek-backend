@@ -39,38 +39,56 @@ const Like = async (
       await user.save();
       likedUser.liked.pull(user._id);
       await likedUser.save();
-      sendNotif(user.id, likedUserId, user.avatar || '', 'New Match', `You have matched with ${user.name}`)
-        const receiverToken = await getUserToken(likedUserId);
-        console.log('Receiver Token:', receiverToken);
-        if (!receiverToken) {
-            console.log('Receiver not found or has no registration token', likedUserId);
-        } else {
-            const payload = {
-                title: 'New Message',
-                body: `You have matched with ${req.user.username}!`
-            };
-            await sendNotification(receiverToken, payload);
-            console.log('Notification sent to receiver');
-        }
+      sendNotif(
+        user.id,
+        likedUserId,
+        user.avatar || "",
+        "New Match",
+        `You have matched with ${user.name}`
+      );
+      const receiverToken = await getUserToken(likedUserId);
+      console.log("Receiver Token:", receiverToken);
+      if (!receiverToken) {
+        console.log(
+          "Receiver not found or has no registration token",
+          likedUserId
+        );
+      } else {
+        const payload = {
+          title: "New Message",
+          body: `You have matched with ${req.user.username}!`,
+        };
+        await sendNotification(receiverToken, payload);
+        console.log("Notification sent to receiver");
+      }
       return res.status(200).send({ message: "It is a match" });
     } else {
       likedUser.likedBy.push(user._id);
       await likedUser.save();
       user.liked.push(likedUserId);
       await user.save();
-      sendNotif(user.id, likedUserId, user.avatar, 'New Like', `Someone has liked you`)
-        const receiverToken = await getUserToken(likedUserId);
-        console.log('Receiver Token:', receiverToken);
-        if (!receiverToken) {
-            console.log('Receiver not found or has no registration token', likedUserId);
-        } else {
-            const payload = {
-                title: 'New Like',
-                body: `Someone has liked you!`
-            };
-            await sendNotification(receiverToken, payload);
-            console.log('Notification sent to receiver');
-        }
+      sendNotif(
+        user.id,
+        likedUserId,
+        user.avatar,
+        "New Like",
+        `Someone has liked you`
+      );
+      const receiverToken = await getUserToken(likedUserId);
+      console.log("Receiver Token:", receiverToken);
+      if (!receiverToken) {
+        console.log(
+          "Receiver not found or has no registration token",
+          likedUserId
+        );
+      } else {
+        const payload = {
+          title: "New Like",
+          body: `Someone has liked you!`,
+        };
+        await sendNotification(receiverToken, payload);
+        console.log("Notification sent to receiver");
+      }
     }
     return res.status(200).send({ message: "User liked successfully" });
   } catch (err) {
@@ -110,5 +128,22 @@ const dislike = async (
   }
 };
 
-const actionController = { Like, dislike };
+const getSuperlikeOffers = async (
+  req: ExtendedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const offers = [
+      { id: 1, superlikes: 4000, price: 30 },
+      { id: 2, superlikes: 6000, price: 50 },
+      { id: 3, superlikes: 9000, price: 80 },
+    ];
+    return res.status(200).send({ message: "Superlike offers", offers });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+const actionController = { Like, dislike, getSuperlikeOffers };
 export default actionController;

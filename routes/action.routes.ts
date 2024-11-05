@@ -7,5 +7,7 @@ const actionRouter = Router()
 actionRouter.post('/like', actionController.Like)
 //@ts-ignore
 actionRouter.post('/dislike', actionController.dislike)
+//@ts-ignore
+actionRouter.get('/superlike-offers', actionController.getSuperlikeOffers)
 
 export default actionRouter
