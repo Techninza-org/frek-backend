@@ -320,7 +320,7 @@ const getWalletTransactionByDate = async (req: ExtendedRequest, res: Response, n
 
 const buySuperLikes = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     const { superlikeCount, cost } = req.body;
-    
+
     if(!superlikeCount || !cost) {
         return res.status(400).json({ message: 'Superlike count and cost are required.' });
     }
@@ -330,9 +330,9 @@ const buySuperLikes = async (req: ExtendedRequest, res: Response, next: NextFunc
         user.boughtSuperLikesBalance += superlikeCount;
         await user.save();
 
-        res.status(200).json({ message: `${superlikeCount} superlikes bought successfully.` });
+        res.status(200).json({ status:200, message: `${superlikeCount} superlikes bought successfully.` });
     } catch (error) {
-        res.status(500).json({ message: 'Failed to buy superlikes.', error });
+        res.status(500).json({ status: 500, error: 'Failed to buy superlikes.' });
     }
 }
 
