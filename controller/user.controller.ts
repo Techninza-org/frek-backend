@@ -258,6 +258,8 @@ const sendSuperLike = async (req: ExtendedRequest, res: Response, next: NextFunc
         const walletTransaction = await Wallet.create({
             sender: senderId,
             recipient: recipientId,
+            senderName: sender.name,
+            recipientName: receiver.name,
             type: 'superlike',
             amount: superlikeCount,
             dateSent: new Date(),
