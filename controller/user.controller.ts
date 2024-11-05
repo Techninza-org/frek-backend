@@ -251,6 +251,9 @@ const sendSuperLike = async (req: ExtendedRequest, res: Response, next: NextFunc
         sender.superlikeBalance -= superlikeCount;
         await sender.save();
 
+        receiver.superlikeBalance += superlikeCount;
+        await receiver.save();
+
         // Record transaction in the Wallet collection
         const walletTransaction = await Wallet.create({
             sender: senderId,
