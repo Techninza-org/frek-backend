@@ -243,15 +243,15 @@ const sendSuperLike = async (req: ExtendedRequest, res: Response, next: NextFunc
             return res.status(400).json({ message: 'Recipient not found.' });
         }
 
-        if (sender.superlikeBalance < superlikeCount) {
+        if (sender.boughtSuperLikesBalance < superlikeCount) {
             return res.status(400).json({ message: 'Insufficient superlike balance.' });
         }
 
         // Deduct superlike balance from the sender
-        sender.superlikeBalance -= superlikeCount;
+        sender.boughtSuperLikesBalance -= superlikeCount;
         await sender.save();
 
-        receiver.superlikeBalance += superlikeCount;
+        receiver.receivedSuperLikesBalance += superlikeCount;
         await receiver.save();
 
         // Record transaction in the Wallet collection

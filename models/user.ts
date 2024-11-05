@@ -35,7 +35,8 @@ const UserSchema = new Schema({
     type: {type: String, required: false},
     otp: {type: Number, required: false},
     blocked: {type: [Schema.Types.ObjectId], required: false},
-    superLikeBalance: {type: Number, default: 0},
+    boughtSuperLikesBalance: {type: Number, default: 0},
+    receivedSuperLikesBalance: {type: Number, default: 0},
 })
 
 export const User = models.User || model('User', UserSchema)
