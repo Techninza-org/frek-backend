@@ -296,6 +296,20 @@ const getWalletTransactionByDate = async (req: ExtendedRequest, res: Response, n
     }
 };
 
+const buySuperLikes = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    const { superlikeCount } = req.body;
 
-const userController = {getUserDetails, signupQuestions, updateUserDetails, deleteUser, getFeed, getMatchedUsers, uploadPics, getNotifications, markAsRead, deleteNotification, addPayment, paymentHistory, blockUserById, sendSuperLike, getWalletTransactionByDate}
+    try {
+        const user = req.user;
+        user.boughtSuperLikesBalance += superlikeCount;
+        await user.save();
+
+        res.status(200).json({ message: `${superlikeCount} superlikes bought successfully.` });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to buy superlikes.', error });
+    }
+}
+
+
+const userController = {getUserDetails, signupQuestions, updateUserDetails, deleteUser, getFeed, getMatchedUsers, uploadPics, getNotifications, markAsRead, deleteNotification, addPayment, paymentHistory, blockUserById, sendSuperLike, getWalletTransactionByDate, buySuperLikes}
 export default userController
