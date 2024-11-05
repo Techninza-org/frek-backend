@@ -41,6 +41,6 @@ userRouter.post('/buy-superlikes', userController.buySuperLikes)
 //@ts-ignore
 userRouter.get('/superlike-offers', userController.getSuperlikeOffers)
 //@ts-ignore
-userRouter.post('update-preferences', userController.updatePreferences)
+userRouter.post('/update-preferences', userController.updatePreferences)
 
 export default userRouter
