@@ -4,6 +4,7 @@ import { User } from "../models/user"
 import helper from "../utils/helpers"
 import { Notification } from "../models/notification"
 import { Payment } from "../models/payment"
+import { Wallet } from "../models/wallet"
 
 const getUserDetails = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     //update last seen 
@@ -220,11 +221,65 @@ const blockUserById = async (req: ExtendedRequest, res: Response, next: NextFunc
         }
         user.blocked.push(userToBlock._id)
         await user.save()
-        return res.status(200).send({message: 'User blocked successfully', user})
+        return res.status(200).send({message: 'User blocked successfully'})
     }catch(err){
         return res.status(400).send({message: 'Error blocking user'})
     }
 }
 
-const userController = {getUserDetails, signupQuestions, updateUserDetails, deleteUser, getFeed, getMatchedUsers, uploadPics, getNotifications, markAsRead, deleteNotification, addPayment, paymentHistory, blockUserById}
+const sendSuperLike = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    const { recipientId, superlikeCount } = req.body;
+
+    if (superlikeCount > 10) {
+        return res.status(400).json({ message: 'Cannot send more than 10 superlikes at once.' });
+    }
+
+    try {
+        const sender = req.user;
+        const senderId = req.user._id;
+
+        if (sender.superlikeBalance < superlikeCount) {
+            return res.status(400).json({ message: 'Insufficient superlike balance.' });
+        }
+
+        // Deduct superlike balance from the sender
+        sender.superlikeBalance -= superlikeCount;
+        await sender.save();
+
+        // Record transaction in the Wallet collection
+        const walletTransaction = await Wallet.create({
+            sender: senderId,
+            recipient: recipientId,
+            type: 'superlike',
+            amount: superlikeCount,
+            dateSent: new Date(),
+        });
+
+        res.status(200).json({ message: `${superlikeCount} superlikes sent to ${recipientId}.`, transaction: walletTransaction });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to send superlikes.', error });
+    }
+};
+
+
+const getWalletTransactionByDate = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    const { date } = req.query;
+
+    try {
+        const user = req.user;
+        const transactions = await Wallet.find({
+            sender: user._id,
+            dateSent: {
+                $gte: new Date(date as string),
+                $lt: new Date(date as string).setDate(new Date(date as string).getDate() + 1),
+            },
+        });
+
+        res.status(200).json({ transactions });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to fetch wallet transactions.', error });
+    }
+}
+
+const userController = {getUserDetails, signupQuestions, updateUserDetails, deleteUser, getFeed, getMatchedUsers, uploadPics, getNotifications, markAsRead, deleteNotification, addPayment, paymentHistory, blockUserById, sendSuperLike, getWalletTransactionByDate}
 export default userController

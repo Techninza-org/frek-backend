@@ -32,5 +32,9 @@ userRouter.post('/payment', userController.addPayment)
 userRouter.get('/payment-history', userController.paymentHistory)
 //@ts-ignore
 userRouter.put('/block/:id', userController.blockUserById)
+//@ts-ignore
+userRouter.post('/superlike', userController.sendSuperLike)
+//@ts-ignore
+userRouter.get('/transactions', userController.getWalletTransactionByDate)
 
 export default userRouter
