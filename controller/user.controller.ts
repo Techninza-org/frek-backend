@@ -266,17 +266,22 @@ const sendSuperLike = async (req: ExtendedRequest, res: Response, next: NextFunc
     }
 };
 
-
 const getWalletTransactionByDate = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     const { date } = req.query;
 
     try {
         const user = req.user;
+
+        const startDate = new Date(date as string);
+        startDate.setHours(0, 0, 0, 0); 
+        const endDate = new Date(date as string);
+        endDate.setHours(23, 59, 59, 999);  
+
         const transactions = await Wallet.find({
             sender: user._id,
-            dateSent: {
-                $gte: new Date(date as string),
-                $lt: new Date(date as string).setDate(new Date(date as string).getDate() + 1),
+            createdAt: {
+                $gte: startDate,
+                $lt: endDate,
             },
         });
 
@@ -284,7 +289,8 @@ const getWalletTransactionByDate = async (req: ExtendedRequest, res: Response, n
     } catch (error) {
         res.status(500).json({ message: 'Failed to fetch wallet transactions.', error });
     }
-}
+};
+
 
 const userController = {getUserDetails, signupQuestions, updateUserDetails, deleteUser, getFeed, getMatchedUsers, uploadPics, getNotifications, markAsRead, deleteNotification, addPayment, paymentHistory, blockUserById, sendSuperLike, getWalletTransactionByDate}
 export default userController
