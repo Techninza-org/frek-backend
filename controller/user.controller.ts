@@ -237,8 +237,9 @@ const sendSuperLike = async (req: ExtendedRequest, res: Response, next: NextFunc
     try {
         const sender = req.user;
         const senderId = req.user._id;
+
         const receiver = await User.findById(recipientId);
-        if(!receiver){
+        if(!receiver) {
             return res.status(400).json({ message: 'Recipient not found.' });
         }
 
@@ -252,14 +253,14 @@ const sendSuperLike = async (req: ExtendedRequest, res: Response, next: NextFunc
 
         // Record transaction in the Wallet collection
         const walletTransaction = await Wallet.create({
-            sender: sender.name,
-            recipient: receiver.name,
+            sender: senderId,
+            recipient: recipientId,
             type: 'superlike',
             amount: superlikeCount,
             dateSent: new Date(),
         });
 
-        res.status(200).json({ message: `${superlikeCount} superlikes sent to ${recipientId}.`, transaction: walletTransaction });
+        res.status(200).json({ message: `${superlikeCount} superlikes sent to ${receiver.name}.`, transaction: walletTransaction });
     } catch (error) {
         res.status(500).json({ message: 'Failed to send superlikes.', error });
     }
