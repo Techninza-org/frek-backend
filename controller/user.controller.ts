@@ -276,25 +276,47 @@ const getWalletTransactionByDate = async (req: ExtendedRequest, res: Response, n
 
     try {
         const user = req.user;
-
         const startDate = new Date(date as string);
-        startDate.setHours(0, 0, 0, 0); 
+        startDate.setHours(0, 0, 0, 0); // Start of the day
         const endDate = new Date(date as string);
-        endDate.setHours(23, 59, 59, 999);  
+        endDate.setHours(23, 59, 59, 999); // End of the day
 
-        const transactions = await Wallet.find({
+        // Find transactions where the user is the sender
+        const sentTransactions = await Wallet.find({
             sender: user._id,
-            createdAt: {
-                $gte: startDate,
-                $lt: endDate,
-            },
-        });
+            createdAt: { $gte: startDate, $lt: endDate },
+        }).populate('recipient', 'name'); // Assuming `username` is the field for recipient's name
+
+        // Find transactions where the user is the recipient
+        const receivedTransactions = await Wallet.find({
+            recipient: user._id,
+            createdAt: { $gte: startDate, $lt: endDate },
+        }).populate('sender', 'name'); // Assuming `username` is the field for sender's name
+
+        // Format the response with custom messages
+        const transactions = {
+            sent: sentTransactions.map(tx => ({
+                _id: tx._id,
+                message: `You sent ${tx.recipient.name} ${tx.amount} superlike${tx.amount > 1 ? 's' : ''}.`,
+                type: tx.type,
+                amount: tx.amount,
+                createdAt: tx.createdAt,
+            })),
+            received: receivedTransactions.map(tx => ({
+                _id: tx._id,
+                message: `${tx.sender.name} sent you ${tx.amount} superlike${tx.amount > 1 ? 's' : ''}.`,
+                type: tx.type,
+                amount: tx.amount,
+                createdAt: tx.createdAt,
+            })),
+        };
 
         res.status(200).json({ transactions });
     } catch (error) {
         res.status(500).json({ message: 'Failed to fetch wallet transactions.', error });
     }
 };
+
 
 const buySuperLikes = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     const { superlikeCount } = req.body;
