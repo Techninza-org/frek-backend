@@ -45,6 +45,7 @@ const UserSchema = new Schema({
     blocked: {type: [Schema.Types.ObjectId], required: false},
     boughtSuperLikesBalance: {type: Number, default: 5},
     receivedSuperLikesBalance: {type: Number, default: 0},
+    isAdmin: {type: Boolean, default: false},
 })
 
 export const User = models.User || model('User', UserSchema)
