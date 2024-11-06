@@ -44,7 +44,8 @@ const Like = async (
         likedUserId,
         user.avatar || "",
         "New Match",
-        `You have matched with ${user.name}`
+        `You have matched with ${user.name}`,
+        'System'
       );
       const receiverToken = await getUserToken(likedUserId);
       console.log("Receiver Token:", receiverToken);
@@ -72,7 +73,8 @@ const Like = async (
         likedUserId,
         user.avatar,
         "New Like",
-        `Someone has liked you`
+        `Someone has liked you`,
+        "System"
       );
       const receiverToken = await getUserToken(likedUserId);
       console.log("Receiver Token:", receiverToken);

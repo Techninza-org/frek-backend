@@ -85,7 +85,8 @@ export const sendNotif = async (
     receiverId: string,
     senderProfile: string,
     title: string,
-    message: string
+    message: string,
+    type: string
 ) => {
     try {
         const notif = await Notification.create({
@@ -94,6 +95,7 @@ export const sendNotif = async (
             sender_profile: senderProfile,
             title: title,
             message: message,
+            type: type
         });
 
         console.log('Notification created:', notif);

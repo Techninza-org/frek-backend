@@ -59,7 +59,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
         })
         user.last_seen = new Date()
         await user.save()
-        sendNotif(user.id, user.id, user.avatar || '', 'Welcome', `Welcome to Frek App, ${user.name}`)
+        sendNotif(user.id, user.id, user.avatar || '', 'Welcome', `Welcome to Frek App, ${user.name}`, 'System')
         const receiverToken = await getUserToken(user.id);
         console.log('Receiver Token:', receiverToken);
         if (!receiverToken) {

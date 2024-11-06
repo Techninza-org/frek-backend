@@ -5,6 +5,7 @@ import helper from "../utils/helpers"
 import { Notification } from "../models/notification"
 import { Payment } from "../models/payment"
 import { Wallet } from "../models/wallet"
+import { sendNotif } from "../app"
 
 const getUserDetails = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     //update last seen 
@@ -264,6 +265,8 @@ const sendSuperLike = async (req: ExtendedRequest, res: Response, next: NextFunc
             amount: superlikeCount,
             dateSent: new Date(),
         });
+
+        sendNotif(senderId, recipientId, req.user.avatar, 'New Superlike', `${req.user.name} has Superliked you`, 'Event')
 
         res.status(200).json({status: 200, message: `${superlikeCount} superlikes sent to ${receiver.name}.`, transaction: walletTransaction });
     } catch (error) {

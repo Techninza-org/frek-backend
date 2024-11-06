@@ -31,7 +31,7 @@ export const sendMessage = async (req: ExtendedRequest, res: Response, next: Nex
         //     io.emit('newMessage', {message: newMessage})
         // }
         io.emit('newMessage', {message: newMessage})
-        sendNotif(senderId, receiverId, user.avatar, 'New Message', `${user.name} has sent you a message`)
+        sendNotif(senderId, receiverId, user.avatar, 'New Message', `${user.name} has sent you a message`, 'System')
         const receiverToken = await getUserToken(receiverId);
         console.log('Receiver Token:', receiverToken);
         if (!receiverToken) {

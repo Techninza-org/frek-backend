@@ -4,7 +4,7 @@ import { User } from '../models/user'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { ExtendedRequest } from '../utils/middleware'
-import { getUserToken, sendNotif, sendNotification } from '../app'
+import { getUserToken } from '../app'
 
 const adminSignup = async (req: Request, res: Response, next: NextFunction) => {
     const isValidPaylod = helper.isValidatePaylod(req.body, ['name', 'email', 'password'])

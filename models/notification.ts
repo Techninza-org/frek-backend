@@ -7,6 +7,7 @@ const notificationSchema = new Schema({
     title: {type: String, required: true},
     message: {type: String, required: true},
     isRead: {type: Boolean, default: false},
+    type: {type: String, required: false},
 },{timestamps: true})
 
 export const Notification = mongoose.models.Notification || mongoose.model('Notification', notificationSchema)
