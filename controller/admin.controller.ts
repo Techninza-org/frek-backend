@@ -67,7 +67,7 @@ const switchActiveUser = async (req: ExtendedRequest, res: Response, next: NextF
         if(!user) return res.status(400).send({message: "User doesn't exist"})
         user.active = !user.active
         await user.save()
-        return res.status(200).send({status: 200, user: user.username, active: user.active})
+        return res.status(200).send({status: 200, user: user.name, active: user.active})
     }catch(err){
         return res.status(500).send({status: 500, message: 'Error updating user'})
     }
