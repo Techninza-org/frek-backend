@@ -53,7 +53,7 @@ const adminLogin = async (req: Request, res: Response, next: NextFunction) => {
 
 const getAllUsers = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     try{
-        const users = await User.find({isAdmin: false}).sort({createdAt: -1});
+        const users = await User.find({isAdmin: false}).sort({createdAt: -1}).select(['name', 'email', 'active', 'createdAt', 'dob' ]);
         return res.status(200).send({status: 200, users})
     }catch(err){
         return res.status(500).send({message: 'Error fetching users'})
