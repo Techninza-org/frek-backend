@@ -17,6 +17,7 @@ import streamRouter from "./routes/stream.routes";
 import { Notification } from "./models/notification";
 import * as admin from 'firebase-admin'
 import { User } from "./models/user";
+import adminRouter from "./routes/admin.routes";
 dotenv.config()
 
 const app = express()
@@ -74,6 +75,8 @@ app.use('/user', middleware.AuthMiddleware, userRouter)
 app.use('/action', middleware.AuthMiddleware, actionRouter)
 //@ts-ignore
 app.use('/message', middleware.AuthMiddleware, messageRouter)
+
+app.use('/admin', adminRouter)
 
 app.use('/stream', streamRouter)
 
