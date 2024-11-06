@@ -276,10 +276,17 @@ const getWalletTransactionByDate = async (req: ExtendedRequest, res: Response, n
 
     try {
         const user = req.user;
-        const startDate = new Date(date as string);
-        startDate.setHours(0, 0, 0, 0); // Start of the day
-        const endDate = new Date(date as string);
-        endDate.setHours(23, 59, 59, 999); // End of the day
+        let startDate = new Date();
+        startDate.setHours(0, 0, 0, 0); 
+        let endDate = new Date();
+        endDate.setHours(23, 59, 59, 999); 
+    
+        if(date){
+        startDate = new Date(date as string);
+        startDate.setHours(0, 0, 0, 0);
+        endDate = new Date(date as string);
+        endDate.setHours(23, 59, 59, 999); 
+        }
 
         // Find transactions where the user is the sender
         const sentTransactions = await Wallet.find({
