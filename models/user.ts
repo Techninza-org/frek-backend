@@ -46,6 +46,7 @@ const UserSchema = new Schema({
     boughtSuperLikesBalance: {type: Number, default: 5},
     receivedSuperLikesBalance: {type: Number, default: 0},
     isAdmin: {type: Boolean, default: false},
+    active: {type: Boolean, default: true},
 })
 
 export const User = models.User || model('User', UserSchema)

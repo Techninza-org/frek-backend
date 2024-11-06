@@ -318,9 +318,9 @@ const getWalletTransactionByDate = async (req: ExtendedRequest, res: Response, n
             })),
         };
 
-        res.status(200).json({ transactions });
+        res.status(200).json({ status: 200, transactions });
     } catch (error) {
-        res.status(500).json({ message: 'Failed to fetch wallet transactions.', error });
+        res.status(500).json({ status: 400, message: 'Failed to fetch wallet transactions.', error });
     }
 };
 
