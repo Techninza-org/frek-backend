@@ -463,7 +463,7 @@ const buyGift = async (req: ExtendedRequest, res: Response, next: NextFunction) 
 };
 
 const sendGift = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
-    const { recipientId, giftType, quantity } = req.body;
+    const { recipientId, giftType } = req.body;
 
     // Define gift values
     const giftValues = [10, 20, 30, 40, 50]; // index corresponds to giftType 0-4
@@ -471,10 +471,6 @@ const sendGift = async (req: ExtendedRequest, res: Response, next: NextFunction)
 
     if (giftType < 0 || giftType > 4) {
         return res.status(400).json({ message: 'Invalid gift type.' });
-    }
-
-    if (quantity <= 0) {
-        return res.status(400).json({ message: 'Quantity must be greater than zero.' });
     }
 
     try {
@@ -488,16 +484,16 @@ const sendGift = async (req: ExtendedRequest, res: Response, next: NextFunction)
         }
 
         // Check if the sender has bought the gift
-        const hasPurchasedGift = await checkGiftPurchase(senderId, giftType, quantity); // Placeholder for API call or DB check
+        const hasPurchasedGift = await checkGiftPurchase(senderId, giftType, 1); // Placeholder for API call or DB check
         if (!hasPurchasedGift) {
             return res.status(400).json({ message: 'Gift not purchased or insufficient quantity available.' });
         }
 
         // Calculate the total value of the gift
-        const totalGiftValue = giftValue * quantity;
+        // const totalGiftValue = giftValue * quantity;
 
         // Update recipient's balance
-        receiver.receivedGiftsBalance += totalGiftValue;
+        // receiver.receivedGiftsBalance += totalGiftValue;
         await receiver.save();
 
         // Record transaction in the Wallet collection
@@ -508,15 +504,14 @@ const sendGift = async (req: ExtendedRequest, res: Response, next: NextFunction)
             recipientName: receiver.name,
             type: 'gift',
             giftType,
-            quantity,
-            amount: totalGiftValue,
+            amount: giftValue,
         });
 
-        sendNotif(senderId, recipientId, sender.avatar, 'New Gift', `${sender.name} has sent you ${quantity} gifts`, 'Event');
+        sendNotif(senderId, recipientId, sender.avatar, 'New Gift', `${sender.name} has sent you a gift`, 'Event');
 
         res.status(200).json({
             status: 200,
-            message: `${quantity} gifts of $${giftValue} each sent to ${receiver.name}. Total: $${totalGiftValue}.`,
+            message: `Gifts of $${giftValue} each sent to ${receiver.name}. Total: $${giftValue}.`,
             transaction: walletTransaction,
         });
     } catch (error) {
