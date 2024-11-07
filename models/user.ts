@@ -48,6 +48,23 @@ const UserSchema = new Schema({
     isAdmin: {type: Boolean, default: false},
     active: {type: Boolean, default: true},
     reportedBy: {type: [Schema.Types.ObjectId], required: false},
+    giftsReceived: {
+        type: [{
+            giftType: {type: Number, required: true},
+            quantity: {type: Number, required: true},
+            dateReceived: {type: Date, default: Date.now}
+        }],
+        required: false
+    },
+    boughtGifts: {
+        type: [{
+            giftType: {type: Number, required: true},
+            quantity: {type: Number, required: true},
+            datePurchased: {type: Date, default: Date.now}
+        }],
+        required: false
+    },
+    walletBalance: {type: Number, default: 0},
 })
 
 export const User = models.User || model('User', UserSchema)

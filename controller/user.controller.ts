@@ -402,6 +402,157 @@ const updatePreferences = async (req: ExtendedRequest, res: Response, next: Next
 }
 
 
+const buyGift = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    const { giftType, quantity } = req.body;
 
-const userController = {getUserDetails, signupQuestions, updateUserDetails, deleteUser, getFeed, getMatchedUsers, uploadPics, getNotifications, markAsRead, deleteNotification, addPayment, paymentHistory, blockUserById, sendSuperLike, getWalletTransactionByDate, buySuperLikes, getSuperlikeOffers, updatePreferences, reportUserById}
+    // Define gift prices
+    const giftPrices = [10, 20, 30, 40, 50]; // Prices for gift types 0-4
+    const giftPrice = giftPrices[giftType];
+
+    // Validate gift type and quantity
+    if (giftType < 0 || giftType > 4) {
+        return res.status(400).json({ message: 'Invalid gift type.' });
+    }
+    if (quantity <= 0) {
+        return res.status(400).json({ message: 'Quantity must be greater than zero.' });
+    }
+
+    try {
+        const userId = req.user._id;
+
+        // Calculate the total cost of the purchase
+        const totalCost = giftPrice * quantity;
+
+        // Retrieve the user
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        // Check if the user has enough balance
+        // if (user.balance < totalCost) {
+        //     return res.status(400).json({ message: 'Insufficient balance to buy gifts.' });
+        // }
+
+        // Deduct the cost from the user's balance
+        // user.balance -= totalCost;
+
+        // Find or add the purchased gift in the user's boughtGifts array
+        const purchasedGift = user.boughtGifts.find((gift: { giftType: any }) => gift.giftType === giftType);
+        if (purchasedGift) {
+            // Update the quantity if the gift type already exists
+            purchasedGift.quantity += quantity;
+        } else {
+            // Add a new gift entry if it doesn't exist
+            user.boughtGifts.push({ giftType, quantity });
+        }
+
+        // Save the updated user
+        await user.save();
+
+        res.status(200).json({
+            status: 200,
+            message: `${quantity} gifts of type ${giftType} bought successfully. Total cost: $${totalCost}.`,
+            user,
+        });
+    } catch (error) {
+        console.error('Error buying gift:', error);
+        res.status(500).json({ status: 500, message: 'Failed to buy gift.', error });
+    }
+};
+
+const sendGift = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    const { recipientId, giftType, quantity } = req.body;
+
+    // Define gift values
+    const giftValues = [10, 20, 30, 40, 50]; // index corresponds to giftType 0-4
+    const giftValue = giftValues[giftType];
+
+    if (giftType < 0 || giftType > 4) {
+        return res.status(400).json({ message: 'Invalid gift type.' });
+    }
+
+    if (quantity <= 0) {
+        return res.status(400).json({ message: 'Quantity must be greater than zero.' });
+    }
+
+    try {
+        const sender = req.user;
+        const senderId = req.user._id;
+
+        // Find the recipient
+        const receiver = await User.findById(recipientId);
+        if (!receiver) {
+            return res.status(400).json({ message: 'Recipient not found.' });
+        }
+
+        // Check if the sender has bought the gift
+        const hasPurchasedGift = await checkGiftPurchase(senderId, giftType, quantity); // Placeholder for API call or DB check
+        if (!hasPurchasedGift) {
+            return res.status(400).json({ message: 'Gift not purchased or insufficient quantity available.' });
+        }
+
+        // Calculate the total value of the gift
+        const totalGiftValue = giftValue * quantity;
+
+        // Update recipient's balance
+        receiver.receivedGiftsBalance += totalGiftValue;
+        await receiver.save();
+
+        // Record transaction in the Wallet collection
+        const walletTransaction = await Wallet.create({
+            sender: senderId,
+            recipient: recipientId,
+            senderName: sender.name,
+            recipientName: receiver.name,
+            type: 'gift',
+            giftType,
+            quantity,
+            amount: totalGiftValue,
+        });
+
+        sendNotif(senderId, recipientId, sender.avatar, 'New Gift', `${sender.name} has sent you ${quantity} gifts`, 'Event');
+
+        res.status(200).json({
+            status: 200,
+            message: `${quantity} gifts of $${giftValue} each sent to ${receiver.name}. Total: $${totalGiftValue}.`,
+            transaction: walletTransaction,
+        });
+    } catch (error) {
+        res.status(500).json({ status: 500, message: 'Failed to send gift.', error });
+    }
+};
+
+const checkGiftPurchase = async (senderId: any, giftType: any, quantity: number) => {
+    try {
+        // Find the user by senderId
+        const user = await User.findById(senderId);
+
+        if (!user) {
+            console.error('User not found');
+            return false;
+        }
+
+        // Find the purchased gift record for the specified gift type
+        const purchasedGift = user.boughtGifts.find((gift: { giftType: any }) => gift.giftType === giftType);
+
+        // Check if the purchased gift exists and has enough quantity
+        if (purchasedGift && purchasedGift.quantity >= quantity) {
+            // Update the quantity in the database to reflect the used quantity
+            purchasedGift.quantity -= quantity;
+            await user.save();
+
+            return true;
+        } else {
+            return false; // Not enough quantity available
+        }
+    } catch (error) {
+        console.error('Error checking gift purchase:', error);
+        return false;
+    }
+};
+
+
+const userController = {getUserDetails, signupQuestions, updateUserDetails, deleteUser, getFeed, getMatchedUsers, uploadPics, getNotifications, markAsRead, deleteNotification, addPayment, paymentHistory, blockUserById, sendSuperLike, getWalletTransactionByDate, buySuperLikes, getSuperlikeOffers, updatePreferences, reportUserById, sendGift, buyGift}
 export default userController
