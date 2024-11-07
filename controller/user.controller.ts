@@ -411,10 +411,10 @@ const buyGift = async (req: ExtendedRequest, res: Response, next: NextFunction) 
 
     // Validate gift type and quantity
     if (giftType < 0 || giftType > 4) {
-        return res.status(400).json({ message: 'Invalid gift type.' });
+        return res.status(400).json({ status:400,message: 'Invalid gift type.' });
     }
     if (quantity <= 0) {
-        return res.status(400).json({ message: 'Quantity must be greater than zero.' });
+        return res.status(400).json({status:400, message: 'Quantity must be greater than zero.' });
     }
 
     try {
@@ -427,7 +427,7 @@ const buyGift = async (req: ExtendedRequest, res: Response, next: NextFunction) 
         const user = await User.findById(userId);
 
         if (!user) {
-            return res.status(404).json({ message: 'User not found.' });
+            return res.status(404).json({status:400, message: 'User not found.' });
         }
 
         // Check if the user has enough balance
@@ -470,7 +470,7 @@ const sendGift = async (req: ExtendedRequest, res: Response, next: NextFunction)
     const giftValue = giftValues[giftType];
 
     if (giftType < 0 || giftType > 4) {
-        return res.status(400).json({ message: 'Invalid gift type.' });
+        return res.status(400).json({status:400, message: 'Invalid gift type.' });
     }
 
     try {
@@ -480,13 +480,13 @@ const sendGift = async (req: ExtendedRequest, res: Response, next: NextFunction)
         // Find the recipient
         const receiver = await User.findById(recipientId);
         if (!receiver) {
-            return res.status(400).json({ message: 'Recipient not found.' });
+            return res.status(400).json({status:400, message: 'Recipient not found.' });
         }
 
         // Check if the sender has bought the gift
         const hasPurchasedGift = await checkGiftPurchase(senderId, giftType, 1); // Placeholder for API call or DB check
         if (!hasPurchasedGift) {
-            return res.status(400).json({ message: 'Gift not purchased or insufficient quantity available.' });
+            return res.status(400).json({ status:400, message: 'Gift not purchased or insufficient quantity available.' });
         }
 
         // Calculate the total value of the gift
