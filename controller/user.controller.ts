@@ -227,6 +227,24 @@ const blockUserById = async (req: ExtendedRequest, res: Response, next: NextFunc
         return res.status(400).send({message: 'Error blocking user'})
     }
 }
+const reportUserById = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    try{
+        const user = req.user
+        const {id} = req.params
+        if(!id) return res.status(400).send({message: 'User id is required'})
+        if(!user) return res.status(400).send({message: 'User not found'})
+        const userToReport = await User.findById(id)
+        if(!userToReport) return res.status(400).send({message: 'User to report not found'})
+        if(userToReport.reportedBy.includes(user._id)){
+            return res.status(400).send({status: 400, message: 'User already reported'})
+        }
+        userToReport.reportedBy.push(user._id)
+        await user.save()
+        return res.status(200).send({ status: 200, message: 'User reported successfully'})
+    }catch(err){
+        return res.status(400).send({status: 500, message: 'Error blocking user'})
+    }
+}
 
 const sendSuperLike = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     const { recipientId, superlikeCount } = req.body;
@@ -383,5 +401,7 @@ const updatePreferences = async (req: ExtendedRequest, res: Response, next: Next
     }
 }
 
-const userController = {getUserDetails, signupQuestions, updateUserDetails, deleteUser, getFeed, getMatchedUsers, uploadPics, getNotifications, markAsRead, deleteNotification, addPayment, paymentHistory, blockUserById, sendSuperLike, getWalletTransactionByDate, buySuperLikes, getSuperlikeOffers, updatePreferences}
+
+
+const userController = {getUserDetails, signupQuestions, updateUserDetails, deleteUser, getFeed, getMatchedUsers, uploadPics, getNotifications, markAsRead, deleteNotification, addPayment, paymentHistory, blockUserById, sendSuperLike, getWalletTransactionByDate, buySuperLikes, getSuperlikeOffers, updatePreferences, reportUserById}
 export default userController

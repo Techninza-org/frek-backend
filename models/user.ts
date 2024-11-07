@@ -47,6 +47,7 @@ const UserSchema = new Schema({
     receivedSuperLikesBalance: {type: Number, default: 0},
     isAdmin: {type: Boolean, default: false},
     active: {type: Boolean, default: true},
+    reportedBy: {type: [Schema.Types.ObjectId], required: false},
 })
 
 export const User = models.User || model('User', UserSchema)
