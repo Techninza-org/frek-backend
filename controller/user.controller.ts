@@ -227,6 +227,37 @@ const blockUserById = async (req: ExtendedRequest, res: Response, next: NextFunc
         return res.status(400).send({message: 'Error blocking user'})
     }
 }
+
+const blockedUserList = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    try{
+        const user = req.user
+        if(!user) return res.status(400).send({status: 400, message: 'User not found'})
+        const blockedUsers = await User.find({_id: {$in: user.blocked}})
+        return res.status(200).send({status: 200, blockedUsers})
+    }catch(err){
+        return res.status(400).send({status: 400, message: 'Error fetching blocked users'})
+    }
+}
+
+const unblockUserById = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    try{
+        const user = req.user
+        const {id} = req.params
+        if(!id) return res.status(400).send({status: 400, message: 'User id is required'})
+        if(!user) return res.status(400).send({status: 400, message: 'User not found'})
+        const userToUnblock = await User.findById(id)
+        if(!userToUnblock) return res.status(400).send({status: 400, message: 'User to unblock not found'})
+        if(!user.blocked.includes(userToUnblock._id)){
+            return res.status(400).send({status: 400, message: 'User not blocked'})
+        }
+        user.blocked = user.blocked.filter((blockedUser: any) => blockedUser.toString() !== userToUnblock._id.toString())
+        await user.save()
+        return res.status(200).send({status: 200, message: 'User unblocked successfully'})
+    }catch(err){
+        return res.status(400).send({status: 400, message: 'Error unblocking user'})
+    }
+}
+
 const reportUserById = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     try{
         const user = req.user
@@ -549,5 +580,5 @@ const checkGiftPurchase = async (senderId: any, giftType: any, quantity: number)
 };
 
 
-const userController = {getUserDetails, signupQuestions, updateUserDetails, deleteUser, getFeed, getMatchedUsers, uploadPics, getNotifications, markAsRead, deleteNotification, addPayment, paymentHistory, blockUserById, sendSuperLike, getWalletTransactionByDate, buySuperLikes, getSuperlikeOffers, updatePreferences, reportUserById, sendGift, buyGift}
+const userController = {getUserDetails, signupQuestions, updateUserDetails, deleteUser, getFeed, getMatchedUsers, uploadPics, getNotifications, markAsRead, deleteNotification, addPayment, paymentHistory, blockUserById, sendSuperLike, getWalletTransactionByDate, buySuperLikes, getSuperlikeOffers, updatePreferences, reportUserById, sendGift, buyGift, blockedUserList, unblockUserById}
 export default userController

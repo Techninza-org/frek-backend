@@ -33,6 +33,10 @@ userRouter.get('/payment-history', userController.paymentHistory)
 //@ts-ignore
 userRouter.put('/block/:id', userController.blockUserById)
 //@ts-ignore
+userRouter.put('/unblock/:id', userController.unblockUserById)
+//@ts-ignore
+userRouter.get('/blocked', userController.blockedUserList)
+//@ts-ignore
 userRouter.put('/report/:id', userController.reportUserById)
 //@ts-ignore
 userRouter.post('/superlike', userController.sendSuperLike)
