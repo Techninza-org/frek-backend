@@ -233,7 +233,7 @@ const blockedUserList = async (req: ExtendedRequest, res: Response, next: NextFu
         const user = req.user
         if(!user) return res.status(400).send({status: 400, message: 'User not found'})
         const blockedUsers = await User.find({_id: {$in: user.blocked}})
-    const simplifiedBlockedUsers = blockedUsers.map(user => ({avatar: user.avatar, name: user.name}));
+    const simplifiedBlockedUsers = blockedUsers.map(user => ({id: user._id,avatar: user.avatar, name: user.name}));
     return res.status(200).send({status: 200, blockedUsers: simplifiedBlockedUsers});
     }catch(err){
         return res.status(400).send({status: 400, message: 'Error fetching blocked users'})
