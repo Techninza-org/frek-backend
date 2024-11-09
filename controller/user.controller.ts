@@ -435,6 +435,8 @@ const updatePreferences = async (req: ExtendedRequest, res: Response, next: Next
 
 const buyGift = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     const { gifts } = req.body; 
+    console.log(gifts, 'gifts');
+    
 
     const giftPrices = [1, 2, 3, 4, 5];
 
