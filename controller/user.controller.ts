@@ -438,7 +438,16 @@ const buyGift = async (req: ExtendedRequest, res: Response, next: NextFunction) 
 
     const giftPrices = [1, 2, 3, 4, 5];
 
-    if (!Array.isArray(gifts) || gifts.some(g => g.giftType < 0 || g.giftType > 4 || g.quantity <= 0)) {
+    if (
+        !Array.isArray(gifts) || 
+        gifts.some(g => 
+            typeof g.giftType !== 'number' || 
+            g.giftType < 0 || 
+            g.giftType > 4 || 
+            typeof g.quantity !== 'number' || 
+            g.quantity <= 0
+        )
+    ) {
         return res.status(400).json({ status: 400, message: 'Invalid gift types or quantities.' });
     }
 
