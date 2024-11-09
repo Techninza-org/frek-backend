@@ -435,8 +435,6 @@ const updatePreferences = async (req: ExtendedRequest, res: Response, next: Next
 
 const buyGift = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     const { gifts } = req.body; 
-    console.log(gifts, 'gifts');
-    
 
     const giftPrices = [1, 2, 3, 4, 5];
 
@@ -478,12 +476,13 @@ const buyGift = async (req: ExtendedRequest, res: Response, next: NextFunction) 
         });
 
         await user.save();
+        const giftsBought = user.boughtGifts
 
         res.status(200).json({
             status: 200,
             message: 'Gifts bought successfully.',
             totalCost,
-            user,
+            giftsBought,
         });
     } catch (error) {
         res.status(500).json({ status: 500, message: 'Failed to buy gifts.', error });
