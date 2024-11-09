@@ -434,64 +434,51 @@ const updatePreferences = async (req: ExtendedRequest, res: Response, next: Next
 
 
 const buyGift = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
-    const { giftType, quantity } = req.body;
+    const { gifts } = req.body; 
 
-    // Define gift prices
-    const giftPrices = [10, 20, 30, 40, 50]; // Prices for gift types 0-4
-    const giftPrice = giftPrices[giftType];
+    const giftPrices = [1, 2, 3, 4, 5];
 
-    // Validate gift type and quantity
-    if (giftType < 0 || giftType > 4) {
-        return res.status(400).json({ status:400,message: 'Invalid gift type.' });
-    }
-    if (quantity <= 0) {
-        return res.status(400).json({status:400, message: 'Quantity must be greater than zero.' });
+    if (!Array.isArray(gifts) || gifts.some(g => g.giftType < 0 || g.giftType > 4 || g.quantity <= 0)) {
+        return res.status(400).json({ status: 400, message: 'Invalid gift types or quantities.' });
     }
 
     try {
         const userId = req.user._id;
 
-        // Calculate the total cost of the purchase
-        const totalCost = giftPrice * quantity;
-
-        // Retrieve the user
         const user = await User.findById(userId);
-
         if (!user) {
-            return res.status(404).json({status:400, message: 'User not found.' });
+            return res.status(404).json({ status: 404, message: 'User not found.' });
         }
 
-        // Check if the user has enough balance
-        // if (user.balance < totalCost) {
-        //     return res.status(400).json({ message: 'Insufficient balance to buy gifts.' });
-        // }
+        let totalCost = 0;
 
-        // Deduct the cost from the user's balance
-        // user.balance -= totalCost;
+        gifts.forEach(gift => {
+            const { giftType, quantity } = gift;
+            const giftPrice = giftPrices[giftType];
+            const cost = giftPrice * quantity;
+            totalCost += cost;
 
-        // Find or add the purchased gift in the user's boughtGifts array
-        const purchasedGift = user.boughtGifts.find((gift: { giftType: any }) => gift.giftType === giftType);
-        if (purchasedGift) {
-            // Update the quantity if the gift type already exists
-            purchasedGift.quantity += quantity;
-        } else {
-            // Add a new gift entry if it doesn't exist
-            user.boughtGifts.push({ giftType, quantity });
-        }
+            const purchasedGift = user.boughtGifts.find((g: { giftType: any }) => g.giftType === giftType);
+            if (purchasedGift) {
+                purchasedGift.quantity += quantity;
+            } else {
+                user.boughtGifts.push({ giftType, quantity });
+            }
+        });
 
-        // Save the updated user
         await user.save();
 
         res.status(200).json({
             status: 200,
-            message: `${quantity} gifts of type ${giftType} bought successfully. Total cost: $${totalCost}.`,
+            message: 'Gifts bought successfully.',
+            totalCost,
             user,
         });
     } catch (error) {
-        console.error('Error buying gift:', error);
-        res.status(500).json({ status: 500, message: 'Failed to buy gift.', error });
+        res.status(500).json({ status: 500, message: 'Failed to buy gifts.', error });
     }
 };
+
 
 const sendGift = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     const { recipientId, giftType } = req.body;
