@@ -52,5 +52,7 @@ userRouter.post('/update-preferences', userController.updatePreferences)
 userRouter.post('/send-gift', userController.sendGift)
 //@ts-ignore
 userRouter.post('/buy-gift', userController.buyGift)
+//@ts-ignore
+userRouter.get('/gifts', userController.getGiftsTypes)
 
 export default userRouter

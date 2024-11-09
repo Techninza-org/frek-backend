@@ -233,7 +233,8 @@ const blockedUserList = async (req: ExtendedRequest, res: Response, next: NextFu
         const user = req.user
         if(!user) return res.status(400).send({status: 400, message: 'User not found'})
         const blockedUsers = await User.find({_id: {$in: user.blocked}})
-        return res.status(200).send({status: 200, blockedUsers})
+    const simplifiedBlockedUsers = blockedUsers.map(user => ({avatar: user.avatar, name: user.name}));
+    return res.status(200).send({status: 200, blockedUsers: simplifiedBlockedUsers});
     }catch(err){
         return res.status(400).send({status: 400, message: 'Error fetching blocked users'})
     }
@@ -432,18 +433,35 @@ const updatePreferences = async (req: ExtendedRequest, res: Response, next: Next
     }
 }
 
+const getGiftsTypes = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    try {
+        const gifts = [
+            { id: 0, name: 'Superlike', price: 1 },
+            { id: 1, name: 'Gift 2', price: 2 },
+            { id: 2, name: 'Gift 3', price: 3 },
+            { id: 3, name: 'Gift 4', price: 4 },
+            { id: 4, name: 'Gift 5', price: 5 },
+            { id: 5, name: 'Gift 6', price: 6 },
+            { id: 6, name: 'Gift 7', price: 7 },
+        ];
+
+        return res.status(200).send({ status:200, message: 'Gift types', gifts });
+    } catch (err) {
+        return res.status(400).send({ status:400, message: 'Error fetching gift types' });
+    }
+}
 
 const buyGift = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     const { gifts } = req.body; 
 
-    const giftPrices = [1, 2, 3, 4, 5];
+    const giftPrices = [1, 2, 3, 4, 5, 6, 7];
 
     if (
         !Array.isArray(gifts) || 
         gifts.some(g => 
             typeof g.giftType !== 'number' || 
             g.giftType < 0 || 
-            g.giftType > 4 || 
+            g.giftType > 6 || 
             typeof g.quantity !== 'number' || 
             g.quantity <= 0
         )
@@ -577,5 +595,5 @@ const checkGiftPurchase = async (senderId: any, giftType: any, quantity: number)
 };
 
 
-const userController = {getUserDetails, signupQuestions, updateUserDetails, deleteUser, getFeed, getMatchedUsers, uploadPics, getNotifications, markAsRead, deleteNotification, addPayment, paymentHistory, blockUserById, sendSuperLike, getWalletTransactionByDate, buySuperLikes, getSuperlikeOffers, updatePreferences, reportUserById, sendGift, buyGift, blockedUserList, unblockUserById}
+const userController = {getUserDetails, signupQuestions, updateUserDetails, deleteUser, getFeed, getMatchedUsers, uploadPics, getNotifications, markAsRead, deleteNotification, addPayment, paymentHistory, blockUserById, sendSuperLike, getWalletTransactionByDate, buySuperLikes, getSuperlikeOffers, updatePreferences, reportUserById, sendGift, buyGift, blockedUserList, unblockUserById, getGiftsTypes}
 export default userController
