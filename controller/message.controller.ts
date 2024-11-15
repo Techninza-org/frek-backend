@@ -39,7 +39,7 @@ export const sendMessage = async (req: ExtendedRequest, res: Response, next: Nex
         } else {
             const payload = {
                 title: 'New Message',
-                body: `${req.user.username} has sent you a message!`
+                body: `${req.user.name} has sent you a message!`
             };
             await sendNotification(receiverToken, payload);
             console.log('Notification sent to receiver');

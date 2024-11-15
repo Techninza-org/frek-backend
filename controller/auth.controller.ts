@@ -67,7 +67,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
         } else {
             const payload = {
                 title: 'Welcome',
-                body: `Welcome to Frek App, ${user.username}!`
+                body: `Welcome to Frek App, ${user.name}!`
             };
             await sendNotification(receiverToken, payload);
             console.log('Notification sent to receiver');

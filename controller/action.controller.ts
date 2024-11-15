@@ -57,7 +57,7 @@ const Like = async (
       } else {
         const payload = {
           title: "New Message",
-          body: `You have matched with ${req.user.username}!`,
+          body: `You have matched with ${req.user.name}!`,
         };
         await sendNotification(receiverToken, payload);
         console.log("Notification sent to receiver");
