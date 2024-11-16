@@ -607,8 +607,8 @@ const updateCustomActiveStatus = async (req: ExtendedRequest, res: Response, nex
         // const user = await User.findById(userId);
 
         const user = req.user;
-
         console.log("user_id: ", user._id);
+
 
         user.customActiveStatus = customActiveStatus;
         await user.save();
