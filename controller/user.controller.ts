@@ -6,6 +6,7 @@ import { Notification } from "../models/notification"
 import { Payment } from "../models/payment"
 import { Wallet } from "../models/wallet"
 import { sendNotif } from "../app"
+import mongoose from "mongoose"
 
 const getUserDetails = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     //update last seen 
@@ -594,6 +595,49 @@ const checkGiftPurchase = async (senderId: any, giftType: any, quantity: number)
     }
 };
 
+const updateCustomActiveStatus = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    const { customActiveStatus } = req.body;
 
-const userController = {getUserDetails, signupQuestions, updateUserDetails, deleteUser, getFeed, getMatchedUsers, uploadPics, getNotifications, markAsRead, deleteNotification, addPayment, paymentHistory, blockUserById, sendSuperLike, getWalletTransactionByDate, buySuperLikes, getSuperlikeOffers, updatePreferences, reportUserById, sendGift, buyGift, blockedUserList, unblockUserById, getGiftsTypes}
+    if (typeof customActiveStatus !== 'number') {return res.status(400).json({ status: 400, message: 'status should be number'});}
+    if (customActiveStatus < 1 || customActiveStatus > 3) {return res.status(400).json({ status: 400, message: 'status should be 0 between 3'});}
+
+    try {
+        
+        // const userId = req.user._id;
+        // const user = await User.findById(userId);
+
+        const user = req.user;
+        console.log("user_id: ", user._id);
+
+
+        user.customActiveStatus = customActiveStatus;
+        await user.save();
+
+        return res.status(200).json({ status: 200, message: 'User active status updated successfully.', active: user.customActiveStatus });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ status: 500, message: 'Failed to update active status.', error });
+    }
+};
+
+const getCustomActiveStatusByUserId = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    const userId = req.params.userId;
+    if (!mongoose.Types.ObjectId.isValid(userId)) {return res.status(400).json({ status: 400, message: 'Invalid user ID' });}
+
+    try {
+        
+        const user = await User.findById(userId);
+        if (!user) {return res.status(404).json({ status: 404, message: 'User not found' });}
+
+        let customAcitveStatus = user.customActiveStatus;
+
+        return res.status(200).json({ status: 200, customAcitveStatus: customAcitveStatus });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ status: 500, message: 'Failed to get active status.', error });
+    }
+
+};
+
+const userController = {getUserDetails, signupQuestions, updateUserDetails, deleteUser, getFeed, getMatchedUsers, uploadPics, getNotifications, markAsRead, deleteNotification, addPayment, paymentHistory, blockUserById, sendSuperLike, getWalletTransactionByDate, buySuperLikes, getSuperlikeOffers, updatePreferences, reportUserById, sendGift, buyGift, blockedUserList, unblockUserById, getGiftsTypes, updateCustomActiveStatus, getCustomActiveStatusByUserId}
 export default userController

@@ -17,6 +17,9 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
     const year = parts[2];
     const age = new Date().getFullYear() - Number(year);
     
+    // const age = 22; //vivek
+    console.log('Age:', age);//vivek
+    
     try{
         const existingUser = await User.findOne({email})
         if(existingUser){
@@ -37,6 +40,7 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
         })
         return res.status(200).send({valid: true, message: 'User created successfully', token})
     }catch(err){
+        console.log(err); //vivek
         return res.status(500).send({message: 'Error creating user'})
     }
 }

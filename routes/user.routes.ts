@@ -54,5 +54,9 @@ userRouter.post('/send-gift', userController.sendGift)
 userRouter.post('/buy-gift', userController.buyGift)
 //@ts-ignore
 userRouter.get('/gifts', userController.getGiftsTypes)
+//@ts-ignore
+userRouter.patch('/update-custom-active-status', userController.updateCustomActiveStatus)
+//@ts-ignore
+userRouter.get('/get-custom-active-status/:userId', userController.getCustomActiveStatusByUserId)
 
 export default userRouter
