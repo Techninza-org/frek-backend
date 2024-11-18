@@ -19,7 +19,7 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
     if (registrationToken && typeof registrationToken !== 'string'){ return res.status(400).send({error: 'Invalid payload', error_message: 'registrationToken must be a string'})}
     if (!phone || typeof phone !== 'number' || phone < 1){ return res.status(400).send({error: 'Invalid payload , number should be a number not smaller than 1', invalidPhone: true})}
     if (!countryPhoneCode || typeof countryPhoneCode !== 'number' || countryPhoneCode < 1 || countryPhoneCode > 999){ return res.status(400).send({error: 'Invalid payload, should be number and between 1-999', invalidCountryPhoneCode: true})}
-    if (!otp || typeof otp !== 'number' || otp < 1000 || otp > 9999){ return res.status(400).send({error: 'Invalid payload, should be number and between 1000-9999', invalidOtp: true})}
+    if (!otp || typeof otp !== 'number' || otp < 100000 || otp > 999999){ return res.status(400).send({error: 'Invalid payload, should be number and between 1000-9999', invalidOtp: true})}
     
     const isPhoneExist = await User.findOne({phone: phone, countryPhoneCode: countryPhoneCode});
     if (isPhoneExist) { return res.status(400).send({error: 'phone number already exists', isPhoneExist: true});}
@@ -197,7 +197,7 @@ const sendSignUpOtp = async (req: Request, res: Response, next: NextFunction) =>
         const isPhoneExist = await User.findOne({ phone: phone, countryPhoneCode: countryPhoneCode });
         if (isPhoneExist) { return res.status(400).send({ error: 'phone number already exists', isPhoneExist: true, status: 400 }); }
 
-        const signUpOtp = 1234;
+        const signUpOtp = 123456;
 
         const isOtpExistByPhone = await Otp.findOne({ phone: phone, countryPhoneCode: countryPhoneCode, otpType: 1 }); // 1: signup
         if (isOtpExistByPhone) {
