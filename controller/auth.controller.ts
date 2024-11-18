@@ -12,6 +12,11 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
         return res.status(400).send({error: 'Invalid payload', error_message: 'name, email, password, gender, dob are required'})
     }
     const {name, email, password, gender, dob} = req.body
+    
+    const {registrationToken} = req.body;
+    if (!registrationToken){ return res.status(400).send({error: 'Invalid payload', error_message: 'registrationToken is required'})}
+    if (registrationToken && typeof registrationToken !== 'string'){ return res.status(400).send({error: 'Invalid payload', error_message: 'registrationToken must be a string'})}
+
     const dobString = String(dob);
     const parts = dobString.split('/');
     const year = parts[2];
@@ -34,6 +39,7 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
             dob: dobString,
             age,
             avatar: "https://thefrekapp.com/public/images/1718965492683-default.png",
+            registrationToken: registrationToken
         })
         const token = jwt.sign({email: req.body.email}, process.env.JWT_SECRET!, {
             expiresIn: '7d'
@@ -51,6 +57,11 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
         return res.status(400).send({error: "Invalid payload", error_message: "email, password are required"})
     }
     const {email, password} = req.body
+    const {registrationToken} = req.body;
+
+    if (!registrationToken){ return res.status(400).send({error: 'Invalid payload', error_message: 'registrationToken is required'})}
+    if (registrationToken && typeof registrationToken !== 'string'){ return res.status(400).send({error: 'Invalid payload', error_message: 'registrationToken must be a string'})}
+
     try{
         const user = await User.findOne({email})
         if(!user) return res.status(400).send({message: "User doesn't exist"})
@@ -62,6 +73,9 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
             expiresIn: '7d'
         })
         user.last_seen = new Date()
+
+        user.registrationToken = registrationToken;
+
         await user.save()
         sendNotif(user.id, user.id, user.avatar || '', 'Welcome', `Welcome to Frek App, ${user.name}`, 'System')
         const receiverToken = await getUserToken(user.id);
