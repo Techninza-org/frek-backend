@@ -7,6 +7,7 @@ import { Payment } from "../models/payment"
 import { Wallet } from "../models/wallet"
 import { sendNotif } from "../app"
 import mongoose from "mongoose"
+import { Reported } from "../models/reported"
 
 const getUserDetails = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     //update last seen 
@@ -264,6 +265,8 @@ const reportUserById = async (req: ExtendedRequest, res: Response, next: NextFun
     try{
         const user = req.user
         const {id} = req.params
+        const { reasonForReport } = req.body;
+
         if(!id) return res.status(400).send({message: 'User id is required'})
         if(!user) return res.status(400).send({message: 'User not found'})
         const userToReport = await User.findById(id)
@@ -272,6 +275,9 @@ const reportUserById = async (req: ExtendedRequest, res: Response, next: NextFun
             return res.status(400).send({status: 400, message: 'User already reported'})
         }
         userToReport.reportedBy.push(user._id)
+
+        const reportUser = await Reported.create({reporter: user._id, reported: userToReport._id, reason: reasonForReport})
+        
         await user.save()
         return res.status(200).send({ status: 200, message: 'User reported successfully'})
     }catch(err){
