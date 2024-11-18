@@ -17,4 +17,6 @@ authRouter.post('/send-otp', authController.SendOtp)
 authRouter.post('/verify-otp', authController.VerifyOtp)
 authRouter.post('/reset-password', authController.resetPassword)
 
+authRouter.post('/send-signup-otp', authController.sendSignUpOtp)
+
 export default authRouter

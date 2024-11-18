@@ -5,6 +5,7 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { ExtendedRequest } from '../utils/middleware'
 import { getUserToken, sendNotif, sendNotification } from '../app'
+import { Otp } from '../models/otp'
 
 const signUp = async (req: Request, res: Response, next: NextFunction) => {
     const isValidPayload = helper.isValidatePaylod(req.body, ['name', 'email', 'password', 'gender', 'dob'])
@@ -13,9 +14,19 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
     }
     const {name, email, password, gender, dob} = req.body
     
-    const {registrationToken} = req.body;
+    const {registrationToken, phone, countryPhoneCode, otp} = req.body;
     if (!registrationToken){ return res.status(400).send({error: 'Invalid payload', error_message: 'registrationToken is required'})}
     if (registrationToken && typeof registrationToken !== 'string'){ return res.status(400).send({error: 'Invalid payload', error_message: 'registrationToken must be a string'})}
+    if (!phone || typeof phone !== 'number' || phone < 1){ return res.status(400).send({error: 'Invalid payload , number should be a number not smaller than 1', invalidPhone: true})}
+    if (!countryPhoneCode || typeof countryPhoneCode !== 'number' || countryPhoneCode < 1 || countryPhoneCode > 999){ return res.status(400).send({error: 'Invalid payload, should be number and between 1-999', invalidCountryPhoneCode: true})}
+    if (!otp || typeof otp !== 'number' || otp < 1000 || otp > 9999){ return res.status(400).send({error: 'Invalid payload, should be number and between 1000-9999', invalidOtp: true})}
+    
+    const isPhoneExist = await User.findOne({phone: phone, countryPhoneCode: countryPhoneCode});
+    if (isPhoneExist) { return res.status(400).send({error: 'phone number already exists', isPhoneExist: true});}
+
+    const isOtpValid = await Otp.findOne({phone: phone, otp: otp, countryPhoneCode: countryPhoneCode, otpType: 1}); // 1: signup
+    if (!isOtpValid) { return res.status(400).send({error: 'Invalid OTP', invalidOtp: true});}
+
 
     const dobString = String(dob);
     const parts = dobString.split('/');
@@ -34,6 +45,8 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
         await User.create({
             name,
             email,
+            phone: phone,
+            countryPhoneCode: countryPhoneCode,
             password: hashedPassword,
             gender,
             dob: dobString,
@@ -44,6 +57,8 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
         const token = jwt.sign({email: req.body.email}, process.env.JWT_SECRET!, {
             expiresIn: '7d'
         })
+
+        await Otp.deleteMany({phone: phone, countryPhoneCode: countryPhoneCode, otpType: 1}); // 1: signup
         return res.status(200).send({valid: true, message: 'User created successfully', token})
     }catch(err){
         console.log(err); //vivek
@@ -172,6 +187,32 @@ const getProfileById = async (req: Request, res: Response, next: NextFunction) =
     }
 }
 
+const sendSignUpOtp = async (req: Request, res: Response, next: NextFunction) => {
+    const { phone, countryPhoneCode } = req.body;
+    if (!phone || typeof phone !== 'number' || phone < 1) { return res.status(400).send({ error: 'Invalid payload', error_message: 'phone should be a number not smaller than 1', invalidPhone: true }); }
+    if (!countryPhoneCode || typeof countryPhoneCode !== 'number' || countryPhoneCode < 1 || countryPhoneCode > 999) { return res.status(400).send({ error: 'Invalid payload', error_message: 'countryPhoneCode should be number and between 1-999', invalidCountryPhoneCode: true }); }
+
+    try {
+        
+        const isPhoneExist = await User.findOne({ phone: phone, countryPhoneCode: countryPhoneCode });
+        if (isPhoneExist) { return res.status(400).send({ error: 'phone number already exists', isPhoneExist: true }); }
+
+        const signUpOtp = 1234;
+
+        const isOtpExistByPhone = await Otp.findOne({ phone: phone, countryPhoneCode: countryPhoneCode, otpType: 1 }); // 1: signup
+        if (isOtpExistByPhone) {
+            const updateOtp = await Otp.findOneAndUpdate({ phone: phone, countryPhoneCode: countryPhoneCode, otpType: 1 }, { otp: signUpOtp });
+            return res.status(200).send({ message: `OTP re-sent successfully on phone +${updateOtp.countryPhoneCode} ${updateOtp.phone}` });
+        }
+        const createOtp = await Otp.create({ phone: phone, countryPhoneCode: countryPhoneCode, otp: signUpOtp, otpType: 1 }); // 1: signup
+
+        return res.status(200).send({ message: `OTP sent successfully on phone +${createOtp.countryPhoneCode} ${createOtp.phone}` });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send({ error: 'Error sending OTP' });
+    }
+}
+
 const SendOtp = async (req: Request, res: Response, _next: NextFunction) => {
     try {
         if (!helper.isValidatePaylod(req.body, ['email'])) {
@@ -267,5 +308,5 @@ const resetPassword = async (req: Request, res: Response, next: NextFunction) =>
 };
 
 
-const authController = {signUp, login, updatePassword, getProfileById, socialLogin, SendOtp, VerifyOtp, resetPassword}
+const authController = {signUp, login, updatePassword, getProfileById, socialLogin, SendOtp, VerifyOtp, resetPassword, sendSignUpOtp}
 export default authController
