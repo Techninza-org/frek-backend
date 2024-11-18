@@ -90,7 +90,16 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
             await sendNotification(receiverToken, payload);
             console.log('Notification sent to receiver');
         }
-        return res.status(200).send({valid: true, message: "Logged in successfully", user, token})
+
+
+        const userWithoutUnwantedFields = user.toObject();
+        delete userWithoutUnwantedFields.liked;
+        delete userWithoutUnwantedFields.likedBy;
+        delete userWithoutUnwantedFields.disliked;
+        delete userWithoutUnwantedFields.matched;
+
+        console.log('User:', user);
+        return res.status(200).send({valid: true, message: "Logged in successfully", user: userWithoutUnwantedFields, token})
     }catch(err){
         return res.status(500).send({error: 'Error while Login'})
     }
