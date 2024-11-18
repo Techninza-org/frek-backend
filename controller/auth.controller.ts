@@ -214,11 +214,39 @@ const sendSignUpOtp = async (req: Request, res: Response, next: NextFunction) =>
 }
 
 const SendOtp = async (req: Request, res: Response, _next: NextFunction) => {
+    const { email, phone, countryPhoneCode } = req.body
+
+    if (!email && !phone) { return res.status(400).send({ status: 400, error: 'Invalid Payload', error_description: 'Email or Phone required' }) }
+    if (email && phone) { return res.status(400).send({ status: 400, error: 'Invalid Payload', error_description: 'Email or Phone required | don not provide both' }) }
+    
     try {
+
+        //============ Phone OTP ================
+        if (phone) {
+            if (!countryPhoneCode) { return res.status(400).send({ status: 400, error: 'Invalid Payload', error_description: 'Country Phone Code required', invalidCountryCode: true }) }
+            if (typeof phone !== 'number' || phone < 1) { return res.status(400).send({ status: 400, error: 'Invalid Payload', error_description: 'Phone should be a number not smaller than 1', invalidPhone: true }) }
+            if (typeof countryPhoneCode !== 'number' || countryPhoneCode < 1 || countryPhoneCode > 999) { return res.status(400).send({ status: 400, error: 'Invalid Payload', error_description: 'Country Phone Code should be number and between 1-999', invalidCountryCode: true }) }
+            const isPhoneExist = await User.findOne({ phone: phone, countryPhoneCode: countryPhoneCode });
+            if (!isPhoneExist) { return res.status(400).send({ status: 404, error: 'Not found', error_description: 'Phone not found in database' }); }
+
+            const otp = 123456;
+
+            const isPhoneOtpExist = await Otp.findOne({ phone: phone , countryPhoneCode: countryPhoneCode, otpType: 2 }); // 2: update
+
+            if (isPhoneOtpExist) {
+                const updateOtpForMobile = await Otp.findOneAndUpdate({ phone: phone, countryPhoneCode: countryPhoneCode, otpType: 2 }, { otp });
+                return res.status(200).send({ status: 200, message: `OTP re-sent successfully for password on phone +${updateOtpForMobile.countryPhoneCode} ${updateOtpForMobile.phone}` });
+            }
+
+            const createOtpForMobile = await Otp.create({ phone: phone, countryPhoneCode: countryPhoneCode, otp, otpType: 2 }); // 2: update
+            return res.status(200).send({ status: 200, message: `OTP sent successfully for password on phone +${createOtpForMobile.countryPhoneCode} ${createOtpForMobile.phone}` });
+        }
+
+
+        //============ Email OTP ================
         if (!helper.isValidatePaylod(req.body, ['email'])) {
             return res.status(400).send({ status: 400, error: 'Invalid Payload', error_description: 'Email requried' })
         }
-        const { email } = req.body
         const otp = Math.floor(100000 + Math.random() * 900000)
         const user = await User.findOne({email})
 
@@ -242,12 +270,32 @@ const SendOtp = async (req: Request, res: Response, _next: NextFunction) => {
 }
 
 const VerifyOtp = async (req: Request, res: Response, _next: NextFunction) => {
+    const { email, otp, phone, countryPhoneCode } = req.body;
+
+    if (!email && !phone) { return res.status(400).send({ status: 400, error: 'Invalid Payload', error_description: 'Email or Phone required' }) }
+    if (email && phone) { return res.status(400).send({ status: 400, error: 'Invalid Payload', error_description: 'Email or Phone required | don not provide both' }) }
+
     try {
+
+        //============ Phone OTP ================
+
+        if (phone){
+            if (!countryPhoneCode) { return res.status(400).send({ status: 400, error: 'Invalid Payload', error_description: 'Country Phone Code required', invalidCountryCode: true }) }
+            if (typeof phone !== 'number' || phone < 1) { return res.status(400).send({ status: 400, error: 'Invalid Payload', error_description: 'Phone should be a number not smaller than 1', invalidPhone: true }) }
+            if (typeof countryPhoneCode !== 'number' || countryPhoneCode < 1 || countryPhoneCode > 999) { return res.status(400).send({ status: 400, error: 'Invalid Payload', error_description: 'Country Phone Code should be number and between 1-999', invalidCountryCode: true }) }
+
+            const isPhoneOtpExist = await Otp.findOne({ phone: phone, countryPhoneCode: countryPhoneCode, otpType: 2 }); // 2: update
+            if (!isPhoneOtpExist) {
+                return res.status(400).send({ status: 400, error: 'Invalid OTP', error_description: 'The OTP provided is incorrect' });
+            }
+
+            return res.status(200).send({ status: 200, message: 'OTP verified successfully' });
+        }
+
         if (!helper.isValidatePaylod(req.body, ['email', 'otp'])) {
             return res.status(400).send({ status: 400, error: 'Invalid Payload', error_description: 'Email and OTP are required' });
         }
 
-        const { email, otp } = req.body;
         
         if (!Number.isInteger(otp)) {
             return res.status(400).send({
@@ -280,15 +328,40 @@ const VerifyOtp = async (req: Request, res: Response, _next: NextFunction) => {
 };
 
 const resetPassword = async (req: Request, res: Response, next: NextFunction) => {
-    // Validate payload to ensure required fields are present
-    const isValidPayload = helper.isValidatePaylod(req.body, ['email', 'password']);
-    if (!isValidPayload) {
-        return res.status(400).send({ error: 'Invalid payload', error_message: 'Email and password are required' });
-    }
-
-    const { email, password } = req.body;
-
+    
+    const { email, password, phone, countryPhoneCode, otp } = req.body;
+    if (!password) { return res.status(400).send({ error: 'Invalid payload', error_message: 'password is required' }); }
+    if (email && phone) { return res.status(400).send({ error: 'Invalid payload', error_message: 'email or phone, not both', status: 400 }); }
+    if (!email && !phone) { return res.status(400).send({ error: 'Invalid payload', error_message: 'email or phone is required', status: 400 }); }
+    
     try {
+
+        // reset password using phone number
+
+        if (phone) {
+            if (!countryPhoneCode) { return res.status(400).send({ error: 'Invalid payload', error_message: 'phoneCountryCode is required' }); }
+            if (!phone || typeof phone !== 'number' || phone < 1) { return res.status(400).send({ error: 'Invalid payload', error_message: 'phone should be a number not smaller than 1' }); }
+            if (typeof countryPhoneCode !== 'number' || countryPhoneCode < 1 || countryPhoneCode > 999) { return res.status(400).send({ error: 'Invalid payload', error_message: 'phoneCountryCode should be number and between 1-999' }); }
+            if (!otp || typeof otp !== 'number' || otp < 100000 || otp > 999999) { return res.status(400).send({ error: 'Invalid payload', error_message: 'otp should be number and between 1000-9999' }); }
+            
+            const isOtpValid = await Otp.findOne({ phone: phone, countryPhoneCode: countryPhoneCode, otp: otp, otpType: 2 }); // 2: update
+            if (!isOtpValid) { return res.status(400).send({ error: 'Invalid OTP', invalidOtp: true }); }
+
+            const hashedPassword = await bcrypt.hash(password, 10);
+            const userByPhone = await User.findOne({ phone: phone, countryPhoneCode: countryPhoneCode });
+            if (!userByPhone) { return res.status(404).send({ message: 'User not found' }); }
+
+            userByPhone.password = hashedPassword;
+            
+            await userByPhone.save();
+            return res.status(200).send({ message: 'Password reset successfully' });
+        }
+
+        // Validate payload to ensure required fields are present
+        const isValidPayload = helper.isValidatePaylod(req.body, ['email', 'password']);
+        if (!isValidPayload) {
+            return res.status(400).send({ error: 'Invalid payload', error_message: 'Email and password are required' });
+        }
         // Find the user by email
         const user = await User.findOne({ email });
         if (!user) {
@@ -300,6 +373,9 @@ const resetPassword = async (req: Request, res: Response, next: NextFunction) =>
 
         // Update the user's password and last_seen timestamp
         await User.findByIdAndUpdate(user._id, { password: hashedPassword, last_seen: new Date() });
+
+        // delete the otp
+        await Otp.deleteMany({ phone: phone, countryPhoneCode: countryPhoneCode, otpType: 2 }); // 2: update
 
         return res.status(200).send({ message: 'Password reset successfully' });
     } catch (err) {
