@@ -25,7 +25,7 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
     if (isPhoneExist) { return res.status(400).send({error: 'phone number already exists', isPhoneExist: true});}
 
     const isOtpValid = await Otp.findOne({phone: phone, otp: otp, countryPhoneCode: countryPhoneCode, otpType: 1}); // 1: signup
-    if (!isOtpValid) { return res.status(400).send({error: 'Invalid OTP', invalidOtp: true});}
+    if (!isOtpValid) { return res.status(400).send({error: 'Invalid OTP', invalidOtp: true, status: 400});}
 
 
     const dobString = String(dob);
@@ -59,10 +59,10 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
         })
 
         await Otp.deleteMany({phone: phone, countryPhoneCode: countryPhoneCode, otpType: 1}); // 1: signup
-        return res.status(200).send({valid: true, message: 'User created successfully', token})
+        return res.status(200).send({valid: true, message: 'User created successfully', token: token, status: 200})
     }catch(err){
         console.log(err); //vivek
-        return res.status(500).send({message: 'Error creating user'})
+        return res.status(500).send({message: 'Error creating user', status: 500})
     }
 }
 
@@ -74,8 +74,8 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     const {email, password} = req.body
     const {registrationToken} = req.body;
 
-    if (!registrationToken){ return res.status(400).send({error: 'Invalid payload', error_message: 'registrationToken is required'})}
-    if (registrationToken && typeof registrationToken !== 'string'){ return res.status(400).send({error: 'Invalid payload', error_message: 'registrationToken must be a string'})}
+    if (!registrationToken){ return res.status(400).send({error: 'Invalid payload', error_message: 'registrationToken is required', status: 400})}
+    if (registrationToken && typeof registrationToken !== 'string'){ return res.status(400).send({error: 'Invalid payload', error_message: 'registrationToken must be a string', status: 400})}
 
     try{
         const user = await User.findOne({email})
@@ -114,7 +114,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
         delete userWithoutUnwantedFields.matched;
 
         console.log('User:', user);
-        return res.status(200).send({valid: true, message: "Logged in successfully", user: userWithoutUnwantedFields, token})
+        return res.status(200).send({valid: true, message: "Logged in successfully", user: userWithoutUnwantedFields, token: token, status: 200})
     }catch(err){
         return res.status(500).send({error: 'Error while Login'})
     }
@@ -195,21 +195,21 @@ const sendSignUpOtp = async (req: Request, res: Response, next: NextFunction) =>
     try {
         
         const isPhoneExist = await User.findOne({ phone: phone, countryPhoneCode: countryPhoneCode });
-        if (isPhoneExist) { return res.status(400).send({ error: 'phone number already exists', isPhoneExist: true }); }
+        if (isPhoneExist) { return res.status(400).send({ error: 'phone number already exists', isPhoneExist: true, status: 400 }); }
 
         const signUpOtp = 1234;
 
         const isOtpExistByPhone = await Otp.findOne({ phone: phone, countryPhoneCode: countryPhoneCode, otpType: 1 }); // 1: signup
         if (isOtpExistByPhone) {
             const updateOtp = await Otp.findOneAndUpdate({ phone: phone, countryPhoneCode: countryPhoneCode, otpType: 1 }, { otp: signUpOtp });
-            return res.status(200).send({ message: `OTP re-sent successfully on phone +${updateOtp.countryPhoneCode} ${updateOtp.phone}` });
+            return res.status(200).send({ message: `OTP re-sent successfully on phone +${updateOtp.countryPhoneCode} ${updateOtp.phone}`, status: 200 });
         }
         const createOtp = await Otp.create({ phone: phone, countryPhoneCode: countryPhoneCode, otp: signUpOtp, otpType: 1 }); // 1: signup
 
-        return res.status(200).send({ message: `OTP sent successfully on phone +${createOtp.countryPhoneCode} ${createOtp.phone}` });
+        return res.status(200).send({ message: `OTP sent successfully on phone +${createOtp.countryPhoneCode} ${createOtp.phone}`, status: 200 });
     } catch (error) {
         console.log(error);
-        return res.status(500).send({ error: 'Error sending OTP' });
+        return res.status(500).send({ error: 'Error sending OTP', status: 500 });
     }
 }
 
