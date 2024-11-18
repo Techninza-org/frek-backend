@@ -284,7 +284,6 @@ const reportUserById = async (req: ExtendedRequest, res: Response, next: NextFun
         await userToReport.save()
 
         const reportUser = await Reported.create({reporter: user._id, reported: userToReport._id, reason: reasonForReport})
-
         await user.save()
         return res.status(200).send({ status: 200, message: 'User reported successfully'})
     }catch(err){
