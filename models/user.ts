@@ -9,6 +9,7 @@ const UserSchema = new Schema({
     age: {type: Number, required: false},
     pics: {type: [String], required: false},
     phone: {type: Number, required: false},
+    countryPhoneCode: {type: Number, required: false},
     bio: {type: String, required: false},
     preference: {type: String, required: false},
     preferences: {
