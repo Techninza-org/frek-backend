@@ -15,8 +15,12 @@ const getUserDetails = async (req: ExtendedRequest, res: Response, next: NextFun
     if(!user) return res.status(400).send({message: 'User not found'})
     user.last_seen = new Date()
     await user.save()
-    const userDetails = await User.findById(user._id).select(['-password, -liked, -blocked, -reportedBy, -matched'])
-    return res.status(200).send({valid: true, user: userDetails })
+    user.password = undefined
+    user.liked = undefined
+    user.blocked = undefined
+    user.matched = undefined
+    user.reportedBy = undefined
+    return res.status(200).send({valid: true, user: user })
 }
 
 const updateUserDetails = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
