@@ -17,9 +17,9 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
     const {registrationToken, phone, countryPhoneCode, otp} = req.body;
     if (!registrationToken){ return res.status(400).send({error: 'Invalid payload', error_message: 'registrationToken is required'})}
     if (registrationToken && typeof registrationToken !== 'string'){ return res.status(400).send({error: 'Invalid payload', error_message: 'registrationToken must be a string'})}
-    if (!phone || typeof phone !== 'number' || phone < 1){ return res.status(400).send({error: 'Invalid payload , number should be a number not smaller than 1', invalidPhone: true})}
+    if (!phone || typeof phone !== 'number' || phone < 1){ return res.status(400).send({error: 'Invalid payload , phone should be a number not smaller than 1', invalidPhone: true})}
     if (!countryPhoneCode || typeof countryPhoneCode !== 'number' || countryPhoneCode < 1 || countryPhoneCode > 999){ return res.status(400).send({error: 'Invalid payload, should be number and between 1-999', invalidCountryPhoneCode: true})}
-    if (!otp || typeof otp !== 'number' || otp < 100000 || otp > 999999){ return res.status(400).send({error: 'Invalid payload, should be number and between 1000-9999', invalidOtp: true})}
+    if (!otp || typeof otp !== 'number' || otp < 100000 || otp > 999999){ return res.status(400).send({error: 'Invalid payload, otp should be number and between 1000-9999', invalidOtp: true})}
     
     const isPhoneExist = await User.findOne({phone: phone, countryPhoneCode: countryPhoneCode});
     if (isPhoneExist) { return res.status(400).send({error: 'phone number already exists', isPhoneExist: true});}
@@ -32,9 +32,6 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
     const parts = dobString.split('/');
     const year = parts[2];
     const age = new Date().getFullYear() - Number(year);
-    
-    // const age = 22; //vivek
-    console.log('Age:', age);//vivek
     
     try{
         const existingUser = await User.findOne({email})

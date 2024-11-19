@@ -18,6 +18,7 @@ import { Notification } from "./models/notification";
 import * as admin from 'firebase-admin'
 import { User } from "./models/user";
 import adminRouter from "./routes/admin.routes";
+import cron from 'node-cron';
 dotenv.config()
 
 const app = express()
@@ -138,7 +139,17 @@ mongoose.connect(process.env.MONGO_URI!)
     .catch((err) => {
         console.log(err);
     })
-    
+
+cron.schedule('0 0 * * *', async () => {
+    console.log('running a task every day');
+    const notifications = Notification.find({read: true})
+    for await (const notification of notifications) {
+        if(notification.createdAt < new Date(Date.now() - 7*24*60*60*1000)){
+            await Notification.findByIdAndDelete(notification._id)
+        }
+    }
+});
+
 const privateKey = fs.readFileSync('/etc/letsencrypt/live/thefrekapp.com/privkey.pem', 'utf8');
 const certificate = fs.readFileSync('/etc/letsencrypt/live/thefrekapp.com/cert.pem', 'utf8');
 const ca = fs.readFileSync('/etc/letsencrypt/live/thefrekapp.com/chain.pem', 'utf8');
