@@ -46,6 +46,11 @@ const updateUserDetails = async (req: ExtendedRequest, res: Response, next: Next
         delete (updatedUser as any).password
         updatedUser.last_seen = new Date()
         await user.save()
+        updatedUser.password = undefined
+        updatedUser.liked = undefined
+        updatedUser.blocked = undefined
+        updatedUser.matched = undefined
+        updatedUser.reportedBy = undefined
         return res.status(200).send({message: 'User details updated successfully', user: updatedUser})
         
     }catch(err){
