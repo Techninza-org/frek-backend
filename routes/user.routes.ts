@@ -13,6 +13,8 @@ userRouter.get('/matched', userController.getMatchedUsers)
 //@ts-ignore
 userRouter.put('/', upload.single("file"), userController.updateUserDetails)
 //@ts-ignore
+userRouter.put('/upload-img', upload.single("file"), userController.uploadImage)
+//@ts-ignore
 userRouter.put('/questions', userController.signupQuestions)
 //@ts-ignore
 // userRouter.put('/avatar', upload.single("file"), userController.updateUserAvatar)

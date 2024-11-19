@@ -15,8 +15,8 @@ const getUserDetails = async (req: ExtendedRequest, res: Response, next: NextFun
     if(!user) return res.status(400).send({message: 'User not found'})
     user.last_seen = new Date()
     await user.save()
-    user.password = undefined
-    return res.status(200).send({valid: true, user: req.user })
+    const userDetails = await User.findById(user._id).select(['-password, -liked, -blocked, -reportedBy, -matched'])
+    return res.status(200).send({valid: true, user: userDetails })
 }
 
 const updateUserDetails = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
@@ -120,11 +120,23 @@ const getFeed = async (req: ExtendedRequest, res: Response, next: NextFunction) 
         if(!user) return res.status(400).send({message: 'User not found'})
         user.last_seen = new Date()
         await user.save()
+
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+        const startIndex = (page - 1) * limit;
+        const endIndex = page * limit;
+
         const users = await User.find({ _id: { $ne: req.user._id } });
         users.filter(user => !user.matched.includes(req.user._id) && !user.liked.includes(req.user._id) && !user.disliked.includes(req.user._id))
         users.sort(() => Math.random() - 0.5)
-        const feed = users.map(user => ({id: user._id, name: user.name, age: user.age, avatar: user.avatar}))
-        return res.status(200).send({feed})
+
+        const paginatedUsers = users.slice(startIndex, endIndex);
+        const feed = paginatedUsers.map(user => ({id: user._id, name: user.name, age: user.age, avatar: user.avatar}))
+
+        const totalUsers = users.length;
+        const totalPages = Math.ceil(totalUsers / limit);
+
+        return res.status(200).send({feed, totalPages});
     }catch(error){
         return res.status(400).send({message: 'Error fetching feed'})
     }
@@ -648,8 +660,20 @@ const getCustomActiveStatusByUserId = async (req: ExtendedRequest, res: Response
         console.log(error);
         return res.status(500).json({ status: 500, message: 'Failed to get active status.', error });
     }
-
 };
 
-const userController = {getUserDetails, signupQuestions, updateUserDetails, deleteUser, getFeed, getMatchedUsers, uploadPics, getNotifications, markAsRead, deleteNotification, addPayment, paymentHistory, blockUserById, sendSuperLike, getWalletTransactionByDate, buySuperLikes, getSuperlikeOffers, updatePreferences, reportUserById, sendGift, buyGift, blockedUserList, unblockUserById, getGiftsTypes, updateCustomActiveStatus, getCustomActiveStatusByUserId}
+const uploadImage = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    try{
+        const user = req.user
+        if(!user) return res.status(400).send({message: 'User not found'})
+        
+        if(!req.file) return res.status(400).send({message: 'Please upload an image'})
+        const fileUrl = helper.imageUrlGen(req.file)
+        return res.status(200).send({status: 200, message: 'File Uploaded Successfully', file: fileUrl})
+    }catch(err){
+        return res.status(400).send({message: 'Error updating user avatar'})
+    }
+}
+
+const userController = {getUserDetails, uploadImage, signupQuestions, updateUserDetails, deleteUser, getFeed, getMatchedUsers, uploadPics, getNotifications, markAsRead, deleteNotification, addPayment, paymentHistory, blockUserById, sendSuperLike, getWalletTransactionByDate, buySuperLikes, getSuperlikeOffers, updatePreferences, reportUserById, sendGift, buyGift, blockedUserList, unblockUserById, getGiftsTypes, updateCustomActiveStatus, getCustomActiveStatusByUserId}
 export default userController

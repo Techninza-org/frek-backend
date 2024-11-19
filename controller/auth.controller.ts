@@ -8,11 +8,11 @@ import { getUserToken, sendNotif, sendNotification } from '../app'
 import { Otp } from '../models/otp'
 
 const signUp = async (req: Request, res: Response, next: NextFunction) => {
-    const isValidPayload = helper.isValidatePaylod(req.body, ['name', 'email', 'password', 'gender', 'dob'])
+    const isValidPayload = helper.isValidatePaylod(req.body, ['name', 'email', 'password', 'gender', 'dob', 'username'])
     if(!isValidPayload){
-        return res.status(400).send({error: 'Invalid payload', error_message: 'name, email, password, gender, dob are required'})
+        return res.status(400).send({error: 'Invalid payload', error_message: 'name, email, password, gender, dob, username are required'})
     }
-    const {name, email, password, gender, dob} = req.body
+    const {name, email, password, gender, dob, username} = req.body
     
     const {registrationToken, phone, countryPhoneCode, otp} = req.body;
     if (!registrationToken){ return res.status(400).send({error: 'Invalid payload', error_message: 'registrationToken is required'})}
@@ -39,12 +39,17 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
     try{
         const existingUser = await User.findOne({email})
         if(existingUser){
-            return res.status(400).send({valid: false, message: 'User already exists'})
+            return res.status(400).send({valid: false, message: 'Email already exists'})
+        }
+        const usernameAlreadyExists = await User.findOne({username})
+        if(usernameAlreadyExists){
+            return res.status(400).send({valid: false, message: 'Username already exists'})
         }
         const hashedPassword = await bcrypt.hash(password, 10)
         await User.create({
             name,
             email,
+            username,
             phone: phone,
             countryPhoneCode: countryPhoneCode,
             password: hashedPassword,
