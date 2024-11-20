@@ -63,6 +63,6 @@ userRouter.get('/get-custom-active-status/:userId', userController.getCustomActi
 //@ts-ignore
 userRouter.post('/new-transaction', userController.createTransaction)
 //@ts-ignore
-userRotuer.get('/transaction', userController.getTransactionByDate)
+userRouter.get('/transaction', userController.getTransactionByDate)
 
 export default userRouter
