@@ -288,6 +288,10 @@ const reportUserById = async (req: ExtendedRequest, res: Response, next: NextFun
         const user = req.user
         const {id} = req.params
         const { reason } = req.body;
+        console.log(reason);
+        console.log(req.body, 'body');
+        
+        
 
         if(reason){
             if (typeof reason !== 'string') { return res.status(400).json({status: 400, message: 'Reason for report should be a string'}) }
