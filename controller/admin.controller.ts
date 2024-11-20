@@ -6,6 +6,7 @@ import jwt from 'jsonwebtoken'
 import { ExtendedRequest } from '../utils/middleware'
 import { getUserToken } from '../app'
 import { Reported } from '../models/reported'
+import { Transaction } from '../models/transaction'
 
 const adminSignup = async (req: Request, res: Response, next: NextFunction) => {
     const isValidPaylod = helper.isValidatePaylod(req.body, ['name', 'email', 'password'])
@@ -96,5 +97,14 @@ const getReports = async (req: ExtendedRequest, res: Response, next: NextFunctio
     }
 }
 
-const adminController = { adminSignup, adminLogin, getAllUsers, switchActiveUser, getUserPosts, getReports }
+const getTransactions = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    try{
+        const transactions = await Transaction.find().sort({createdAt: -1}).populate('userId', 'name email')
+        return res.status(200).send({status: 200, transactions})
+    }catch(err){
+        return res.status(500).send({message: 'Error fetching transactions'})
+    }
+}
+
+const adminController = { adminSignup, adminLogin, getAllUsers, switchActiveUser, getUserPosts, getReports, getTransactions }
 export default adminController

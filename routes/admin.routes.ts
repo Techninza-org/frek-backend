@@ -12,6 +12,8 @@ adminRouter.get('/user', middleware.AuthMiddleware, adminController.getAllUsers)
 adminRouter.get('/user/:id', middleware.AuthMiddleware, adminController.getUserPosts)
 //@ts-ignore
 adminRouter.put('/user/:id', middleware.AuthMiddleware, adminController.switchActiveUser)
+//@ts-ignore
+adminRouter.get('/transaction', middleware.AuthMiddleware, adminController.getTransactions)
 
 
 export default adminRouter
