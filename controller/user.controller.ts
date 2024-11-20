@@ -473,13 +473,13 @@ const updatePreferences = async (req: ExtendedRequest, res: Response, next: Next
 const getGiftsTypes = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     try {
         const gifts = [
-            { id: 0, name: 'Superlike', price: 1 },
-            { id: 1, name: 'Gift 2', price: 2 },
-            { id: 2, name: 'Gift 3', price: 3 },
-            { id: 3, name: 'Gift 4', price: 4 },
-            { id: 4, name: 'Gift 5', price: 5 },
-            { id: 5, name: 'Gift 6', price: 6 },
-            { id: 6, name: 'Gift 7', price: 7 },
+            { id: 0, name: 'Gift 1', price: 10 },
+            { id: 1, name: 'Gift 2', price: 20 },
+            { id: 2, name: 'Gift 3', price: 30 },
+            { id: 3, name: 'Gift 4', price: 40 },
+            { id: 4, name: 'Gift 5', price: 50 },
+            { id: 5, name: 'Gift 6', price: 60 },
+            { id: 6, name: 'Gift 7', price: 70 },
         ];
 
         return res.status(200).send({ status:200, message: 'Gift types', gifts });
@@ -491,7 +491,7 @@ const getGiftsTypes = async (req: ExtendedRequest, res: Response, next: NextFunc
 const buyGift = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     const { gifts } = req.body; 
 
-    const giftPrices = [1, 2, 3, 4, 5, 6, 7];
+    const giftPrices = [10, 20, 30, 40, 50, 60, 70];
 
     if (
         !Array.isArray(gifts) || 
@@ -549,10 +549,10 @@ const sendGift = async (req: ExtendedRequest, res: Response, next: NextFunction)
     const { recipientId, giftType } = req.body;
 
     // Define gift values
-    const giftValues = [10, 20, 30, 40, 50]; // index corresponds to giftType 0-4
+    const giftValues = [10, 20, 30, 40, 50, 60, 70]; // index corresponds to giftType 0-5
     const giftValue = giftValues[giftType];
 
-    if (giftType < 0 || giftType > 4) {
+    if (giftType < 0 || giftType > 6) {
         return res.status(400).json({status:400, message: 'Invalid gift type.' });
     }
 
