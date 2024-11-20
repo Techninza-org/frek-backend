@@ -407,7 +407,7 @@ const getWalletTransactionByDate = async (req: ExtendedRequest, res: Response, n
 
         const sorted_transacs = [...transactions.sent, ...transactions.received].sort((a, b) => b.createdAt - a.createdAt);
 
-        res.status(200).json({ status: 200, sorted_transacs });
+        res.status(200).json({ status: 200, sorted_transacs, wallet_balance: user.walletBalance });
     } catch (error) {
         res.status(500).json({ status: 400, message: 'Failed to fetch wallet transactions.', error });
     }
@@ -575,7 +575,8 @@ const sendGift = async (req: ExtendedRequest, res: Response, next: NextFunction)
         // const totalGiftValue = giftValue * quantity;
 
         // Update recipient's balance
-        // receiver.receivedGiftsBalance += totalGiftValue;
+        receiver.receivedGiftsBalance += giftValue;
+        receiver.walletBalance += giftValue;
         await receiver.save();
 
         // Record transaction in the Wallet collection
