@@ -18,7 +18,7 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
     if (!registrationToken){ return res.status(400).send({error: 'Invalid payload', error_message: 'registrationToken is required'})}
     if (registrationToken && typeof registrationToken !== 'string'){ return res.status(400).send({error: 'Invalid payload', error_message: 'registrationToken must be a string'})}
     if (!phone || typeof phone !== 'number' || phone < 1){ return res.status(400).send({error: 'Invalid payload , phone should be a number not smaller than 1', invalidPhone: true})}
-    if (!countryPhoneCode || typeof countryPhoneCode !== 'number' || countryPhoneCode < 1 || countryPhoneCode > 999){ return res.status(400).send({error: 'Invalid payload, should be number and between 1-999', invalidCountryPhoneCode: true})}
+    if (!countryPhoneCode || typeof countryPhoneCode !== 'number' || countryPhoneCode < 0 || countryPhoneCode > 999){ return res.status(400).send({error: 'Invalid payload, should be number and between 1-999', invalidCountryPhoneCode: true})}
     if (!otp || typeof otp !== 'number' || otp < 100000 || otp > 999999){ return res.status(400).send({error: 'Invalid payload, otp should be number and between 1000-9999', invalidOtp: true})}
     
     const isPhoneExist = await User.findOne({phone: phone, countryPhoneCode: countryPhoneCode});

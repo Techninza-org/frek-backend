@@ -571,9 +571,6 @@ const sendGift = async (req: ExtendedRequest, res: Response, next: NextFunction)
             return res.status(400).json({ status:400, message: 'Gift not purchased or insufficient quantity available.' });
         }
 
-        // Calculate the total value of the gift
-        // const totalGiftValue = giftValue * quantity;
-
         // Update recipient's balance
         receiver.receivedGiftsBalance += giftValue;
         receiver.walletBalance += giftValue;
