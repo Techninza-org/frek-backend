@@ -287,12 +287,12 @@ const reportUserById = async (req: ExtendedRequest, res: Response, next: NextFun
     try{
         const user = req.user
         const {id} = req.params
-        const { reasonForReport } = req.body;
+        const { reason } = req.body;
 
-        if(reasonForReport){
-            if (typeof reasonForReport !== 'string') { return res.status(400).json({status: 400, message: 'Reason for report should be a string'}) }
-            if (reasonForReport.trim().length < 1) { return res.status(400).json({status: 400, message: 'Reason for report should not be empty'}) }
-            if (reasonForReport.trim().length > 1000) { return res.status(400).json({status: 400, message: 'Reason for report should not exceed 1000 characters'}) }
+        if(reason){
+            if (typeof reason !== 'string') { return res.status(400).json({status: 400, message: 'Reason for report should be a string'}) }
+            if (reason.trim().length < 1) { return res.status(400).json({status: 400, message: 'Reason for report should not be empty'}) }
+            if (reason.trim().length > 1000) { return res.status(400).json({status: 400, message: 'Reason for report should not exceed 1000 characters'}) }
         }
 
         if(!id) return res.status(400).send({message: 'User id is required'})
@@ -305,7 +305,7 @@ const reportUserById = async (req: ExtendedRequest, res: Response, next: NextFun
         userToReport.reportedBy.push(user._id)
         await userToReport.save()
 
-        const reportUser = await Reported.create({reporter: user._id, reported: userToReport._id, reason: reasonForReport})
+        const reportUser = await Reported.create({reporter: user._id, reported: userToReport._id, reason: reason})
         await user.save()
         return res.status(200).send({ status: 200, message: 'User reported successfully'})
     }catch(err){
