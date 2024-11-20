@@ -5,6 +5,7 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { ExtendedRequest } from '../utils/middleware'
 import { getUserToken } from '../app'
+import { Reported } from '../models/reported'
 
 const adminSignup = async (req: Request, res: Response, next: NextFunction) => {
     const isValidPaylod = helper.isValidatePaylod(req.body, ['name', 'email', 'password'])
@@ -86,5 +87,14 @@ const getUserPosts = async (req: ExtendedRequest, res: Response, next: NextFunct
     }
 }
 
-const adminController = { adminSignup, adminLogin, getAllUsers, switchActiveUser, getUserPosts }
+const getReports = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    try{
+        const reports = await Reported.find().sort({createdAt: -1}).populate('reporter', 'name email').populate('reported', 'name email')
+        return res.status(200).send({status: 200, reports})
+    }catch(err){
+        return res.status(500).send({message: 'Error fetching users'})
+    }
+}
+
+const adminController = { adminSignup, adminLogin, getAllUsers, switchActiveUser, getUserPosts, getReports }
 export default adminController

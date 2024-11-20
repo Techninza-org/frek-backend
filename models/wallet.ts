@@ -5,7 +5,7 @@ const walletSchema = new Schema({
     recipient: {type: Schema.Types.ObjectId, ref: "User", required: true},
     senderName: {type: String, required: false},
     recipientName: {type: String, required: false},
-    type: {type: String, required: true},
+    isReceived: {type: Boolean, required: false},
     amount: {type: Number, required: true},
     createdAt: {type: Date, default: Date.now}
 })

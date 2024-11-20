@@ -60,5 +60,9 @@ userRouter.get('/gifts', userController.getGiftsTypes)
 userRouter.patch('/update-custom-active-status', userController.updateCustomActiveStatus)
 //@ts-ignore
 userRouter.get('/get-custom-active-status/:userId', userController.getCustomActiveStatusByUserId)
+//@ts-ignore
+userRouter.post('/new-transaction', userController.createTransaction)
+//@ts-ignore
+userRotuer.get('/transaction', userController.getTransactionByDate)
 
 export default userRouter

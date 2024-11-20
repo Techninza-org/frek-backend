@@ -8,6 +8,7 @@ import { Wallet } from "../models/wallet"
 import { sendNotif } from "../app"
 import mongoose from "mongoose"
 import { Reported } from "../models/reported"
+import { Transaction } from "../models/transaction"
 
 const getUserDetails = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     //update last seen 
@@ -684,5 +685,51 @@ const uploadImage = async (req: ExtendedRequest, res: Response, next: NextFuncti
     }
 }
 
-const userController = {getUserDetails, uploadImage, signupQuestions, updateUserDetails, deleteUser, getFeed, getMatchedUsers, uploadPics, getNotifications, markAsRead, deleteNotification, addPayment, paymentHistory, blockUserById, sendSuperLike, getWalletTransactionByDate, buySuperLikes, getSuperlikeOffers, updatePreferences, reportUserById, sendGift, buyGift, blockedUserList, unblockUserById, getGiftsTypes, updateCustomActiveStatus, getCustomActiveStatusByUserId}
+const createTransaction = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    try{    
+        const {amount, type, quantity, status, currency, orderId} = req.body
+        const transaction = await Transaction.create({
+            userId: req.user._id,
+            amount, type, quantity, status, currency, orderId
+        })
+        return res.status(200).send({status: 200, message: "Transaction created successfully", transaction})
+
+    }catch(err){
+        return res.status(400).send({message: 'Error creating transaction'})
+    }
+}
+
+const getTransactionByDate = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    const { startDate: start, endDate: end } = req.query;
+
+    try {
+        const user = req.user;
+
+        let startDate: Date, endDate: Date;
+
+        if (start && end) {
+            startDate = new Date(start as string);
+            startDate.setHours(0, 0, 0, 0);
+            endDate = new Date(end as string);
+            endDate.setHours(23, 59, 59, 999);
+        } else {
+            const now = new Date();
+            startDate = new Date(now.getFullYear(), now.getMonth(), 1); // First day of the current month
+            endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999); // Last day of the current month
+        }
+
+        const transactions = await Transaction.find({
+            userId: user._id,
+            createdAt: { $gte: startDate, $lt: endDate },
+        });
+
+        res.status(200).json({ status: 200, data: transactions });
+    } catch (error) {
+        res.status(500).json({ status: 400, message: 'Failed to fetch transactions.', error });
+    }
+};
+
+
+
+const userController = {getUserDetails, createTransaction, getTransactionByDate, uploadImage, signupQuestions, updateUserDetails, deleteUser, getFeed, getMatchedUsers, uploadPics, getNotifications, markAsRead, deleteNotification, addPayment, paymentHistory, blockUserById, sendSuperLike, getWalletTransactionByDate, buySuperLikes, getSuperlikeOffers, updatePreferences, reportUserById, sendGift, buyGift, blockedUserList, unblockUserById, getGiftsTypes, updateCustomActiveStatus, getCustomActiveStatusByUserId}
 export default userController
