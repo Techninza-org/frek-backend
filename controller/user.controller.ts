@@ -692,6 +692,7 @@ const uploadImage = async (req: ExtendedRequest, res: Response, next: NextFuncti
 const createTransaction = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     try{    
         const {amount, type, quantity, status, currency, orderId} = req.body
+        if(!amount || !type || !quantity || !status || !currency || !orderId) return res.status(400).send({message: 'All fields are required'})
         const transaction = await Transaction.create({
             userId: req.user._id,
             amount, type, quantity, status, currency, orderId

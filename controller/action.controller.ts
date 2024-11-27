@@ -73,7 +73,7 @@ const Like = async (
         likedUserId,
         user.avatar,
         "New Like",
-        `Someone has liked you`,
+        `${user.username} has liked you`,
         "System"
       );
       const receiverToken = await getUserToken(likedUserId);
@@ -86,7 +86,7 @@ const Like = async (
       } else {
         const payload = {
           title: "New Like",
-          body: `Someone has liked you!`,
+          body: `${user.username} has liked you!`,
         };
         await sendNotification(receiverToken, payload);
         console.log("Notification sent to receiver");
