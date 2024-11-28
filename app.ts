@@ -19,7 +19,7 @@ import * as admin from 'firebase-admin'
 import { User } from "./models/user";
 import adminRouter from "./routes/admin.routes";
 import cron from 'node-cron';
-import { RtcTokenBuilder, RtcRole } from "agora-access-token";
+import { RtcTokenBuilder, RtcRole, RtmTokenBuilder } from "agora-access-token";
 
 dotenv.config()
 
@@ -69,7 +69,7 @@ app.post('/create-payment-intent', async (req, res) => {
     }
 });
 
-app.post("/generate-agora-token", (req, res) => {
+app.post("/generate-rtc-token", (req, res) => {
     const { channelName, uid, role = "PUBLISHER", tokenExpiration = 3600} = req.body;
   
     // Validate input
@@ -100,6 +100,34 @@ app.post("/generate-agora-token", (req, res) => {
     } catch (err) {
       console.error("Error generating token:", err);
       return res.status(500).json({ error: "Failed to generate token" });
+    }
+});
+
+app.post("/generate-rtm-token", (req, res) => {
+    const { userAccount } = req.body;
+    const salt = Math.floor(Math.random() * 100000); // Generate a random salt
+    const expirationTimeInSeconds = 86400; // Validity of the token (1 hour)
+    const privilegeExpiredTs = Math.floor(Date.now() / 1000) + expirationTimeInSeconds;
+  
+    // Validate the request
+    if (!userAccount) {
+      return res.status(400).json({ error: "userAccount is required" });
+    }
+  
+    const appId = process.env.AGORA_APP_ID;
+    const appCertificate = process.env.AGORA_APP_CERTIFICATE;
+  
+    if (!appId || !appCertificate) {
+      return res.status(500).json({ error: "AGORA_APP_ID or AGORA_APP_CERTIFICATE not set in environment variables" });
+    }
+  
+    try {
+      // Generate the RTM token
+      const token = RtmTokenBuilder.buildToken(appId, appCertificate, userAccount, salt, privilegeExpiredTs);
+      return res.json({ token });
+    } catch (err) {
+      console.error("Error generating RTM token:", err);
+      return res.status(500).json({ error: "Failed to generate RTM token" });
     }
 });
 
