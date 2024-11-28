@@ -19,6 +19,8 @@ import * as admin from 'firebase-admin'
 import { User } from "./models/user";
 import adminRouter from "./routes/admin.routes";
 import cron from 'node-cron';
+import { RtcTokenBuilder, RtcRole } from "agora-access-token";
+
 dotenv.config()
 
 const app = express()
@@ -64,6 +66,40 @@ app.post('/create-payment-intent', async (req, res) => {
         res.json({ clientSecret: paymentIntent.client_secret, id: paymentIntent.id });
     } catch (error: any) {
         res.status(500).send({ error: error.message });
+    }
+});
+
+app.post("/generate-agora-token", (req, res) => {
+    const { channelName, uid, role = "PUBLISHER", tokenExpiration = 3600} = req.body;
+  
+    // Validate input
+    if (!channelName || uid == null) {
+      return res.status(400).json({ error: "channelName and uid are required" });
+    }
+  
+    const appId = process.env.AGORA_APP_ID;
+    const appCertificate = process.env.AGORA_APP_CERTIFICATE;
+  
+    if (!appId || !appCertificate) {
+      return res.status(500).json({ error: "AGORA_APP_ID or AGORA_APP_CERTIFICATE not set in environment variables" });
+    }
+  
+    // Set role
+    const rtcRole = role === "SUBSCRIBER" ? RtcRole.SUBSCRIBER : RtcRole.PUBLISHER;
+  
+    try {
+        const token = RtcTokenBuilder.buildTokenWithUid(
+            appId,
+            appCertificate,
+            channelName,
+            uid,
+            rtcRole,
+            tokenExpiration
+          );
+      return res.json({ token });
+    } catch (err) {
+      console.error("Error generating token:", err);
+      return res.status(500).json({ error: "Failed to generate token" });
     }
 });
 
