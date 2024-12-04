@@ -201,5 +201,5 @@ const acceptStreamGroupJoinRequest = async (req: ExtendedRequest, res: Response,
     }
 }
 
-const streamController = {startStream, getAllStreams, stopStream, getAllAgoraStreamsOverApplication, getAllStreamGroups, sendStreamGroupJoinRequest, acceptStreamGroupJoinRequest}
+const streamController = {startStream, getAllStreams, stopStream, getAllAgoraStreamsOverApplication, getAllStreamGroups, sendStreamGroupJoinRequest, acceptStreamGroupJoinRequest, createStreamGroup}
 export default streamController
