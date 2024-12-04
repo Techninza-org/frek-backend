@@ -36,7 +36,8 @@
                 document.getElementById('connectBtn').disabled = true;
 
                 // Connect to Socket.io server
-                socket = io('http://localhost:3000', {
+                // socket = io('http://localhost:3000', {
+                socket = io('https://thefrekapp.com', {
                     query: {
                         userId: userId
                     }
@@ -86,7 +87,8 @@
             document.getElementById('sendMessageBtn').disabled = false;
         }
 
-        const groupId = 'group1'; // Example group ID used for all group-related actions
+        // const groupId = 'group1'; // Example group ID used for all group-related actions
+        const groupId = '67504e38488011b6af446ba5'; // Example group ID used for all group-related actions
 
         // Join group functionality
         document.getElementById('joinGroupBtn').addEventListener('click', () => {
