@@ -124,6 +124,7 @@ app.post("/generate-rtm-token", (req, res) => {
     try {
       // Generate the RTM token
       const token = RtmTokenBuilder.buildToken(appId, appCertificate, userAccount, salt, privilegeExpiredTs);
+      
       return res.json({ token });
     } catch (err) {
       console.error("Error generating RTM token:", err);
@@ -233,6 +234,8 @@ const io = new Server(httpsServer, {
     }
 });
 
+const groupUsers = new Map()
+
 io.on('connection', (socket) => {
     console.log('user connected', socket.id);
     const userId = socket.handshake.query.userId
@@ -251,6 +254,62 @@ io.on('connection', (socket) => {
         }
         io.emit('getOnlineUsers', Object.keys(userSocketMap))
     })
+
+    //============= Group Chat Start =============
+    socket.on('joinGroup', ({ userId, groupId }) => {
+
+        // Store the user’s database ID along with socketId and group information
+        groupUsers.set(userId, { socketId: socket.id, groupId: groupId })
+
+        // Add the user to the specified group
+        socket.join(groupId)
+
+        // Notify other users in the group that a new user has joined
+        socket.to(groupId).emit('userJoined', { userId })
+        console.log(`User ${userId} joined group ${groupId}`)
+    });
+
+    // Event: User sends a message to the group
+    socket.on('sendGroupMessage', ({ userId, groupId, groupMessage }) => {
+        const userSocketInfoFromGroupUsers = groupUsers.get(userId); // Get user info from the 'users' Map using userId (from DB)
+
+        if (userSocketInfoFromGroupUsers) {
+            // Send the message to all users in the group
+            io.to(groupId).emit('recieveGroupMessage', { senderUserId: userId, groupMessage: groupMessage });
+
+            // Log the sent message for debugging or tracking
+            console.log(`User ${userId} sent a message: '${groupMessage}' to group ${groupId}`);
+        } else {
+            console.log(`User ${userId} not found in group ${groupId} | inside sendGroupMessage`);
+        }
+    });
+
+    // Event: user leave group
+    socket.on('leaveGroup', ({ userId, groupId }) => {
+        const userSocketInfoFromGroupUsers = groupUsers.get(userId); // Get user info from the 'users' Map using userId (from DB)
+
+        if (userSocketInfoFromGroupUsers) {
+            socket.leave(groupId); // Remove the user from the group
+            io.to(groupId).emit('userLeftsFromGroup', { userId: userId }); // Notify other users in the group that a user has left
+
+            // Remove the user from the 'users' Map (effectively removing them from the system)
+            groupUsers.delete(userId);
+
+            console.log(`User ${userId} left group ${groupId}`);
+        } else {
+            console.log(`User ${userId} not found in group ${groupId} | inside leaveGroup`);
+        }
+    });
+
+    // Event: Get the number of users in a group
+    socket.on('groupUsersCount', ({groupId}) => {
+        const groupUsersCount = io.sockets.adapter.rooms.get(groupId)?.size || 0;
+        console.log(`Group ${groupId} has ${groupUsersCount} users`);
+        
+        socket.emit('recieveGroupUsersCount', { groupUsersCount: groupUsersCount });
+    });
+
+    //============= Group Chat End =============
 })
     
 const httpApp = express();
@@ -291,6 +350,8 @@ export { io, httpsServer, httpServer };
 // import * as admin from 'firebase-admin'
 // import { User } from "./models/user";
 // import adminRouter from "./routes/admin.routes";
+// import cron from 'node-cron';
+// import { RtcTokenBuilder, RtcRole, RtmTokenBuilder } from "agora-access-token";
 // dotenv.config()
 
 // const app = express()
@@ -433,6 +494,8 @@ export { io, httpsServer, httpServer };
 //     }
 // });
 
+// const groupUsers = new Map()
+
 // io.on('connection', (socket) => {
 //     console.log('user connected', socket.id);
 //     const userId = socket.handshake.query.userId
@@ -451,6 +514,62 @@ export { io, httpsServer, httpServer };
 //         }
 //         io.emit('getOnlineUsers', Object.keys(userSocketMap))
 //     })
+
+//     //============= Group Chat Start =============
+//     socket.on('joinGroup', ({ userId, groupId }) => {
+
+//         // Store the user’s database ID along with socketId and group information
+//         groupUsers.set(userId, { socketId: socket.id, groupId: groupId })
+
+//         // Add the user to the specified group
+//         socket.join(groupId)
+
+//         // Notify other users in the group that a new user has joined
+//         socket.to(groupId).emit('userJoined', { userId })
+//         console.log(`User ${userId} joined group ${groupId}`)
+//     });
+
+//     // Event: User sends a message to the group
+//     socket.on('sendGroupMessage', ({ userId, groupId, groupMessage }) => {
+//         const userSocketInfoFromGroupUsers = groupUsers.get(userId); // Get user info from the 'users' Map using userId (from DB)
+
+//         if (userSocketInfoFromGroupUsers) {
+//             // Send the message to all users in the group
+//             io.to(groupId).emit('recieveGroupMessage', { senderUserId: userId, groupMessage: groupMessage });
+
+//             // Log the sent message for debugging or tracking
+//             console.log(`User ${userId} sent a message: '${groupMessage}' to group ${groupId}`);
+//         } else {
+//             console.log(`User ${userId} not found in group ${groupId} | inside sendGroupMessage`);
+//         }
+//     });
+
+//     // Event: user leave group
+//     socket.on('leaveGroup', ({ userId, groupId }) => {
+//         const userSocketInfoFromGroupUsers = groupUsers.get(userId); // Get user info from the 'users' Map using userId (from DB)
+
+//         if (userSocketInfoFromGroupUsers) {
+//             socket.leave(groupId); // Remove the user from the group
+//             io.to(groupId).emit('userLeftsFromGroup', { userId: userId }); // Notify other users in the group that a user has left
+
+//             // Remove the user from the 'users' Map (effectively removing them from the system)
+//             groupUsers.delete(userId);
+
+//             console.log(`User ${userId} left group ${groupId}`);
+//         } else {
+//             console.log(`User ${userId} not found in group ${groupId} | inside leaveGroup`);
+//         }
+//     });
+
+//     // Event: Get the number of users in a group
+//     socket.on('groupUsersCount', ({groupId}) => {
+//         const groupUsersCount = io.sockets.adapter.rooms.get(groupId)?.size || 0;
+//         console.log(`Group ${groupId} has ${groupUsersCount} users`);
+        
+//         socket.emit('recieveGroupUsersCount', { groupUsersCount: groupUsersCount });
+//     });
+
+//     //============= Group Chat End =============
 // })
     
 // const httpApp = express();

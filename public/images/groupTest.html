@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket.io Test</title>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+</head>
+<body>
+    <h1>Socket.io Frontend</h1>
+
+    <!-- Input for User ID -->
+    <label for="userId">Enter your User ID: </label>
+    <input type="text" id="userId" placeholder="Enter User ID" />
+    <button id="connectBtn">Connect</button>
+
+    <div id="messages"></div>
+    
+    <button id="joinGroupBtn" disabled>Join Group</button>
+    <button id="leaveGroupBtn" disabled>Leave Group</button>
+    <button id="getUserCountBtn" disabled>Get User Count</button>
+    <input type="text" id="messageInput" placeholder="Type a message" disabled />
+    <button id="sendMessageBtn" disabled>Send Message</button>
+
+    <script>
+        let socket; // Declare socket variable globally
+        let userId = null;
+
+        // Connect to Socket.io when user clicks 'Connect' button
+        document.getElementById('connectBtn').addEventListener('click', () => {
+            userId = document.getElementById('userId').value.trim();
+
+            if (userId) {
+                // Disable inputs after connecting
+                document.getElementById('userId').disabled = true;
+                document.getElementById('connectBtn').disabled = true;
+
+                // Connect to Socket.io server
+                socket = io('http://localhost:3000', {
+                    query: {
+                        userId: userId
+                    }
+                });
+
+                // Handle successful connection
+                socket.on('connect', () => {
+                    console.log('Connected to server');
+                    enableChatFeatures(); // Enable chat features after successful connection
+                });
+
+                // Listen for online users
+                socket.on('getOnlineUsers', (users) => {
+                    console.log('Online users:', users);
+                });
+
+                // Listen for group messages
+                socket.on('recieveGroupMessage', (data) => {
+                    const messageElement = document.createElement('p');
+                    messageElement.textContent = `User ${data.senderUserId} says: ${data.groupMessage}`;
+                    document.getElementById('messages').appendChild(messageElement);
+                });
+
+                // Listen for group users count
+                socket.on('recieveGroupUsersCount', (data) => {
+                    const countMessage = `Group ${groupId} has ${data.groupUsersCount} users.`;
+                    
+                    // Print in console
+                    console.log(countMessage);
+
+                    // Display the count in the messages section
+                    const messageElement = document.createElement('p');
+                    messageElement.textContent = countMessage;
+                    document.getElementById('messages').appendChild(messageElement);
+                });
+            } else {
+                alert('Please enter a valid User ID');
+            }
+        });
+
+        // Function to enable chat features after connection
+        function enableChatFeatures() {
+            document.getElementById('joinGroupBtn').disabled = false;
+            document.getElementById('leaveGroupBtn').disabled = false;
+            document.getElementById('getUserCountBtn').disabled = false;
+            document.getElementById('messageInput').disabled = false;
+            document.getElementById('sendMessageBtn').disabled = false;
+        }
+
+        const groupId = 'group1'; // Example group ID used for all group-related actions
+
+        // Join group functionality
+        document.getElementById('joinGroupBtn').addEventListener('click', () => {
+            socket.emit('joinGroup', { userId, groupId });
+            console.log('User joined the group');
+        });
+
+        // Leave group functionality
+        document.getElementById('leaveGroupBtn').addEventListener('click', () => {
+            socket.emit('leaveGroup', { userId, groupId });
+            console.log('User left the group');
+        });
+
+        // Get the number of users in a group
+        document.getElementById('getUserCountBtn').addEventListener('click', () => {
+            socket.emit('groupUsersCount', { groupId });
+        });
+
+        // Send message to group
+        document.getElementById('sendMessageBtn').addEventListener('click', () => {
+            const message = document.getElementById('messageInput').value;
+            socket.emit('sendGroupMessage', { userId, groupId, groupMessage: message });
+            document.getElementById('messageInput').value = ''; // Clear the input
+        });
+    </script>
+</body>
+</html>
