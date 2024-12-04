@@ -19,6 +19,6 @@ streamRouter.get('/testing', streamController.getAllAgoraStreamsOverApplication)
 streamRouter.get('/allSreamGroups', streamController.getAllStreamGroups)
 
 //@ts-ignore
-streamRouter.get('/createStream', streamController.createStreamGroup)
+streamRouter.post('/createStream', streamController.createStreamGroup)
 
 export default streamRouter
