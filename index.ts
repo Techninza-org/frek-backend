@@ -28,6 +28,8 @@ const HTTP_PORT = process.env.HTTP_PORT || 80;
 
 // const HTTP_PORT = process.env.HTTP_PORT || 3000;  //vivek
 
+// const HOST = '0.0.0.0';
+
 import('./app')
     .then((server) => {
         const httpsServer = server.httpsServer; 

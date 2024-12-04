@@ -12,4 +12,10 @@ streamRouter.get('/', streamController.getAllStreams)
 //@ts-ignore
 streamRouter.delete('/:liveID', middleware.AuthMiddleware, streamController.stopStream)
 
+//@ts-ignore
+streamRouter.get('/testing', streamController.getAllAgoraStreamsOverApplication)
+
+//@ts-ignore
+streamRouter.get('/allSreamGroups', streamController.getAllStreamGroups)
+
 export default streamRouter
