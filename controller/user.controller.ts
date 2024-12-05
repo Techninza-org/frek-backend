@@ -147,7 +147,7 @@ const getFeed = async (req: ExtendedRequest, res: Response, next: NextFunction) 
         
         const userPreferences = user.preferences[0] ? user.preferences[0] : false;
 
-        const users = await User.find({ _id: { $nin: userIdToExclude }, age: {$gt: userPreferences.minAge || 18, $lt: userPreferences.maxAge || 40 } });
+        const users = await User.find({ _id: { $nin: userIdToExclude }, age: {$gt: userPreferences.minAge || 18, $lt: userPreferences.maxAge || 40 }, gender: (userPreferences.gender).toLowerCase() || 'male' });
 
 
         
@@ -783,6 +783,28 @@ const getRtcToken = async (req: ExtendedRequest, res: Response, next: NextFuncti
 
         // if (!user.rtcToken) {
         console.log("user rtc token: ", user.rtcToken)
+
+        let rtcTokenByChannelName = 'notFoundToken';
+
+        const isRtcTokenAvailableByChannelNameOverAllUsers = await User.findOne({
+            rtcToken: {
+                $elemMatch: {channelName: channelName}
+            }
+        })
+
+        if (isRtcTokenAvailableByChannelNameOverAllUsers){
+
+            console.log("inside if rtc token is available in all-users-object")
+
+            for (let i = 0 ; i < isRtcTokenAvailableByChannelNameOverAllUsers.rtcToken.length; i++ ){
+                if (isRtcTokenAvailableByChannelNameOverAllUsers.rtcToken[i].channelName === channelName){
+                    rtcTokenByChannelName = isRtcTokenAvailableByChannelNameOverAllUsers.rtcToken[i].token;
+                    break;
+                }
+            }
+
+            return res.status(200).json({ token: rtcTokenByChannelName });
+        }
 
         const isRtcTokenPresent = user.rtcToken.find((x: any) => x.channelName === channelName);
         if (!isRtcTokenPresent) { // 
