@@ -138,8 +138,16 @@ const getFeed = async (req: ExtendedRequest, res: Response, next: NextFunction) 
         const startIndex = (page - 1) * limit;
         const endIndex = page * limit;
 
-        const users = await User.find({ _id: { $ne: req.user._id } });
+        const userIdToExclude = [...user.liked, ...user.matched, ...user.disliked, ...user.blocked, user._id]
+
+        // const users = await User.find({ _id: { $ne: req.user._id } });
+
+        const users = await User.find({ _id: { $nin: userIdToExclude } });
+
+        console.log("users length", users.length);
+
         users.filter(user => !user.matched.includes(req.user._id) && !user.liked.includes(req.user._id) && !user.disliked.includes(req.user._id))
+
         users.sort(() => Math.random() - 0.5)
 
         const paginatedUsers = users.slice(startIndex, endIndex);
@@ -148,7 +156,7 @@ const getFeed = async (req: ExtendedRequest, res: Response, next: NextFunction) 
         const totalUsers = users.length;
         const totalPages = Math.ceil(totalUsers / limit);
 
-        return res.status(200).send({feed, totalPages});
+        return res.status(200).send({feed: feed, totalPages: feed, totalCountUser: feed.length});
     }catch(error){
         return res.status(400).send({message: 'Error fetching feed'})
     }
