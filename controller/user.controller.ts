@@ -741,7 +741,7 @@ const getTransactionByDate = async (req: ExtendedRequest, res: Response, next: N
 //get rtc token
 
 const getRtcToken = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
-    const { channelName, uid, role = "PUBLISHER", tokenExpiration = 3600} = req.body;
+    const { channelName, uid, role = "PUBLISHER", tokenExpiration = 3600 * 24 * 7 } = req.body;
     const user = req.user;
   
     // Validate input
@@ -763,7 +763,11 @@ const getRtcToken = async (req: ExtendedRequest, res: Response, next: NextFuncti
 
         if(!user) { return res.status(400).send({message: 'User not found'}) };
 
-        if (!user.rtcToken) {
+        // if (!user.rtcToken) {
+        console.log("user rtc token: ", user.rtcToken)
+
+        const isRtcTokenPresent = user.rtcToken.find((x: any) => x.channelName === channelName);
+        if (!isRtcTokenPresent) { // 
 
             console.log("inside if rtc not present in user object")
 
@@ -776,18 +780,23 @@ const getRtcToken = async (req: ExtendedRequest, res: Response, next: NextFuncti
                 tokenExpiration
             );
 
-            user.rtcToken = {token: token};
+            // user.rtcToken = { token: token, channelName: channelName };
+            user.rtcToken.push({ token: token, channelName: channelName });
 
             await user.save();
 
             return res.json({ token: token });
         }
 
-        if (user.rtcToken) {
+        // if (user.rtcToken) {
+        if (isRtcTokenPresent) {
 
             console.log("inside if rtc is present in user object")
+
+            //getting index of the channelName in the array
+            let index = user.rtcToken.findIndex((x: any) => x.channelName === channelName);
             
-            if (user.rtcToken.createdAt + ( 3600 * 24) < Date.now()) { // if token is older than 24 hours 
+            if (user.rtcToken[index].createdAt + ( 3600 * 24) < Date.now()) { // if token is older than 24 hours 
 
                 console.log("inside if rtc is present in user object and is older than 24 hours")
 
@@ -800,14 +809,15 @@ const getRtcToken = async (req: ExtendedRequest, res: Response, next: NextFuncti
                     tokenExpiration
                 );
                 
-                user.rtcToken = {token: token};
+                // user.rtcToken = {token: token, channelName: channelName};
+                user.rtcToken[index] = {token: token, channelName: channelName};
                 await user.save();
 
                 return res.json({ token: token });
             } else {
 
                 console.log("inside if rtc is present in user object and is -not- older than 24 hours")
-                return res.status(200).json({ token: user.rtcToken.token });
+                return res.status(200).json({ token: user.rtcToken[index].token });
             }
         }
     } catch (err) {

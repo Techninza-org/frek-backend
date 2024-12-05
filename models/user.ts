@@ -70,10 +70,11 @@ const UserSchema = new Schema({
     customActiveStatus: {type: Number, default: 2, required: false, enum: [1, 2, 3], min: 1, max: 3}, // 1: online, 2: offline, 3: away
     // rtmToken: {type: String, required: false},
     rtcToken: {
-        type: {
+        type: [{
             token: {type: String, required: false},
+            channelName: {type: String, required: false},
             tokenCreatedAt: {type: Date, default: Date.now},
-        },
+        }],
         required: false
     },
 })
