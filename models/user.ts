@@ -68,7 +68,14 @@ const UserSchema = new Schema({
     },
     walletBalance: {type: Number, default: 0},
     customActiveStatus: {type: Number, default: 2, required: false, enum: [1, 2, 3], min: 1, max: 3}, // 1: online, 2: offline, 3: away
-    rtmToken: {type: String, required: false},
+    // rtmToken: {type: String, required: false},
+    rtcToken: {
+        type: {
+            token: {type: String, required: false},
+            tokenCreatedAt: {type: Date, default: Date.now},
+        },
+        required: false
+    },
 })
 
 export const User = models.User || model('User', UserSchema)

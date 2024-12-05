@@ -52,7 +52,7 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
             password: hashedPassword,
             gender,
             dob: dobString,
-            age,
+            age: age,
             avatar: "https://thefrekapp.com/public/images/1718965492683-default.png",
             registrationToken: registrationToken
         })

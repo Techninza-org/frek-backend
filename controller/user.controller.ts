@@ -10,6 +10,8 @@ import mongoose from "mongoose"
 import { Reported } from "../models/reported"
 import { Transaction } from "../models/transaction"
 
+import { RtcTokenBuilder, RtcRole, RtmTokenBuilder } from "agora-access-token";
+
 const getUserDetails = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     //update last seen 
     const user = req.user
@@ -734,7 +736,87 @@ const getTransactionByDate = async (req: ExtendedRequest, res: Response, next: N
     }
 };
 
+//===========
+
+//get rtc token
+
+const getRtcToken = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    const { channelName, uid, role = "PUBLISHER", tokenExpiration = 3600} = req.body;
+    const user = req.user;
+  
+    // Validate input
+    if (!channelName || uid == null) {
+      return res.status(400).json({ error: "channelName and uid are required" });
+    }
+  
+    const appId = process.env.AGORA_APP_ID || '0ad2acf092ca4c088f5f00e41e170286';
+    const appCertificate = process.env.AGORA_APP_CERTIFICATE || 'c8300f5918aa498b90cbd74c880022c0';
+  
+    if (!appId || !appCertificate) {
+      return res.status(500).json({ error: "AGORA_APP_ID or AGORA_APP_CERTIFICATE not set in environment variables" });
+    }
+  
+    // Set role
+    const rtcRole = role === "SUBSCRIBER" ? RtcRole.SUBSCRIBER : RtcRole.PUBLISHER;
+  
+    try {
+
+        if(!user) { return res.status(400).send({message: 'User not found'}) };
+
+        if (!user.rtcToken) {
+
+            console.log("inside if rtc not present in user object")
+
+            const token = RtcTokenBuilder.buildTokenWithUid(
+                appId,
+                appCertificate,
+                channelName,
+                uid,
+                rtcRole,
+                tokenExpiration
+            );
+
+            user.rtcToken = {token: token};
+
+            await user.save();
+
+            return res.json({ token: token });
+        }
+
+        if (user.rtcToken) {
+
+            console.log("inside if rtc is present in user object")
+            
+            if (user.rtcToken.createdAt + ( 3600 * 24) < Date.now()) { // if token is older than 24 hours 
+
+                console.log("inside if rtc is present in user object and is older than 24 hours")
+
+                const token = RtcTokenBuilder.buildTokenWithUid(
+                    appId,
+                    appCertificate,
+                    channelName,
+                    uid,
+                    rtcRole,
+                    tokenExpiration
+                );
+                
+                user.rtcToken = {token: token};
+                await user.save();
+
+                return res.json({ token: token });
+            } else {
+
+                console.log("inside if rtc is present in user object and is -not- older than 24 hours")
+                return res.status(200).json({ token: user.rtcToken.token });
+            }
+        }
+    } catch (err) {
+      console.error("Error generating token:", err);
+      return res.status(500).json({ error: "Failed to generate token" });
+    }
+}
 
 
-const userController = {getUserDetails, createTransaction, getTransactionByDate, uploadImage, signupQuestions, updateUserDetails, deleteUser, getFeed, getMatchedUsers, uploadPics, getNotifications, markAsRead, deleteNotification, addPayment, paymentHistory, blockUserById, sendSuperLike, getWalletTransactionByDate, buySuperLikes, getSuperlikeOffers, updatePreferences, reportUserById, sendGift, buyGift, blockedUserList, unblockUserById, getGiftsTypes, updateCustomActiveStatus, getCustomActiveStatusByUserId}
+
+const userController = {getUserDetails, createTransaction, getTransactionByDate, uploadImage, signupQuestions, updateUserDetails, deleteUser, getFeed, getMatchedUsers, uploadPics, getNotifications, markAsRead, deleteNotification, addPayment, paymentHistory, blockUserById, sendSuperLike, getWalletTransactionByDate, buySuperLikes, getSuperlikeOffers, updatePreferences, reportUserById, sendGift, buyGift, blockedUserList, unblockUserById, getGiftsTypes, updateCustomActiveStatus, getCustomActiveStatusByUserId, getRtcToken}
 export default userController
