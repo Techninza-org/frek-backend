@@ -142,7 +142,17 @@ const getFeed = async (req: ExtendedRequest, res: Response, next: NextFunction) 
 
         // const users = await User.find({ _id: { $ne: req.user._id } });
 
-        const users = await User.find({ _id: { $nin: userIdToExclude } });
+        // const users = await User.find({ _id: { $nin: userIdToExclude } }); //vivek pal
+        // const users = await User.find({ _id: { $nin: userIdToExclude }, preferences: {$elemMatch: {minAge: 18}} });
+        
+        const userPreferences = user.preferences[0] ? user.preferences[0] : false;
+
+        const users = await User.find({ _id: { $nin: userIdToExclude }, age: {$gt: userPreferences.minAge || 18, $lt: userPreferences.maxAge || 40 } });
+
+
+        
+
+        console.log("userPreferences: ", userPreferences);
 
         console.log("users length", users.length);
 
@@ -804,7 +814,7 @@ const getRtcToken = async (req: ExtendedRequest, res: Response, next: NextFuncti
             //getting index of the channelName in the array
             let index = user.rtcToken.findIndex((x: any) => x.channelName === channelName);
             
-            if (user.rtcToken[index].createdAt + ( 3600 * 24) < Date.now()) { // if token is older than 24 hours 
+            if (user.rtcToken[index].createdAt + ( 3600 * 24 * 7 ) < Date.now()) { // if token is older than 24 hours 
 
                 console.log("inside if rtc is present in user object and is older than 24 hours")
 
