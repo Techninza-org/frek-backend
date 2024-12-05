@@ -65,4 +65,7 @@ userRouter.post('/new-transaction', userController.createTransaction)
 //@ts-ignore
 userRouter.get('/transaction', userController.getTransactionByDate)
 
+//@ts-ignore
+userRouter.post('/get-user-rtc-token', userController.getRtcToken)
+
 export default userRouter
