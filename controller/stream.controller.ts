@@ -116,9 +116,9 @@ const createStreamGroup = async (req: ExtendedRequest, res: Response, next: Next
         const isUserHasAnyLiveStreamGroup = await StreamGroup.findOne({hostUserId: currentUserId, isLive: true});
 
         if (isUserHasAnyLiveStreamGroup) {
-            return res.status(200).send({ message: 'User already has a live stream group', StreamGroup: isUserHasAnyLiveStreamGroup, status: 200 });
+            return res.status(200).send({ message: 'User already has a live stream group', streamGroup: isUserHasAnyLiveStreamGroup, status: 200 });
         }
-        
+
         const user = await User.findById(currentUserId);
         if (!user) { return res.status(404).send({ message: 'User not found', status: 404 }) }
 
