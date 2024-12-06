@@ -118,6 +118,9 @@ const createStreamGroup = async (req: ExtendedRequest, res: Response, next: Next
 
         const streamGroup = await StreamGroup.create({hostUserId: user._id, hostUsername: user.username, hostProfilePic: user.avatar});
 
+        streamGroup.streamGroupId = streamGroup._id;
+        await streamGroup.save();
+
         return res.status(200).send({ message: `Stream group created successfully with streamGroupId: ${streamGroup._id}`, streamGroup: streamGroup, status: 200 });
     } catch (error) {
         console.log("error in createStreamGroup", error);

@@ -139,24 +139,16 @@ const getFeed = async (req: ExtendedRequest, res: Response, next: NextFunction) 
         const endIndex = page * limit;
 
         const userIdToExclude = [...user.liked, ...user.matched, ...user.disliked, ...user.blocked, user._id]
-
-        // const users = await User.find({ _id: { $ne: req.user._id } });
-
-        // const users = await User.find({ _id: { $nin: userIdToExclude } }); //vivek pal
-        // const users = await User.find({ _id: { $nin: userIdToExclude }, preferences: {$elemMatch: {minAge: 18}} });
         
         const userPreferences = user.preferences[0] ? user.preferences[0] : false;
 
         const users = await User.find({ _id: { $nin: userIdToExclude }, age: {$gt: userPreferences.minAge || 18, $lt: userPreferences.maxAge || 40 }, gender: (userPreferences.gender).toLowerCase() || 'male' });
 
-
-        
-
         console.log("userPreferences: ", userPreferences);
 
         console.log("users length", users.length);
 
-        users.filter(user => !user.matched.includes(req.user._id) && !user.liked.includes(req.user._id) && !user.disliked.includes(req.user._id))
+        // users.filter(user => !user.matched.includes(req.user._id) && !user.liked.includes(req.user._id) && !user.disliked.includes(req.user._id))
 
         users.sort(() => Math.random() - 0.5)
 
