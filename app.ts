@@ -265,7 +265,7 @@ io.on('connection', (socket) => {
         socket.join(groupId)
 
         // Notify other users in the group that a new user has joined
-        socket.to(groupId).emit('userJoined', { userId })
+        // socket.to(groupId).emit('userJoined', { userId })
         console.log(`User ${userId} joined group ${groupId}`)
     });
 
