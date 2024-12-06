@@ -870,15 +870,28 @@ const getLikedUsersStreamGroups = async (req: ExtendedRequest, res: Response, ne
         console.log("loggedInuserid: ", loggedInUser._id)
 
         const likedUsersIdsArray = loggedInUser.liked;
+        const matchedUserIdsArray = loggedInUser.matched;
 
-        console.log("likedUsersIdsArray: ", likedUsersIdsArray);
+        const mergedArray = likedUsersIdsArray;
+
+        console.log(" likedUsersIdsArray: ", likedUsersIdsArray);
+        console.log(" mergedArray: ", mergedArray);
+        
+        if (matchedUserIdsArray.length > 0) {
+            for (let i = 0; i < matchedUserIdsArray.length; i++) {
+                if (!mergedArray.includes(matchedUserIdsArray[i])) {
+                    mergedArray.push(matchedUserIdsArray[i]);
+                }
+            }
+        }
 
         const streamByHostId = await StreamGroup.find({ hostUserId: '675199f28f944ebe7bbabde7' });
-
         console.log("streamByHostId: ", streamByHostId);
 
+
         // get all live streamGroups of liked users
-        const streamGroups = await StreamGroup.find({ hostUserId: { $in: likedUsersIdsArray }, isLive: true });
+        // const streamGroups = await StreamGroup.find({ hostUserId: { $in: likedUsersIdsArray }, isLive: true });
+        const streamGroups = await StreamGroup.find({ hostUserId: { $in: mergedArray }, isLive: true });
 
         return res.status(200).json({ status: 200, streamGroups: streamGroups });
     } catch (error) {
