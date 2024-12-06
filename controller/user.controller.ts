@@ -11,6 +11,7 @@ import { Reported } from "../models/reported"
 import { Transaction } from "../models/transaction"
 
 import { RtcTokenBuilder, RtcRole, RtmTokenBuilder } from "agora-access-token";
+import { StreamGroup } from "../models/streamGroup"
 
 const getUserDetails = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     //update last seen 
@@ -858,7 +859,33 @@ const getRtcToken = async (req: ExtendedRequest, res: Response, next: NextFuncti
     }
 }
 
+// get streamGroup of all liked users (live streamGroups)
+const getLikedUsersStreamGroups = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    const loggedInUser = req.user;
 
+    try {
+        
+        if (!loggedInUser) { return res.status(400).send({message: 'logged-in User not found'}) };
 
-const userController = {getUserDetails, createTransaction, getTransactionByDate, uploadImage, signupQuestions, updateUserDetails, deleteUser, getFeed, getMatchedUsers, uploadPics, getNotifications, markAsRead, deleteNotification, addPayment, paymentHistory, blockUserById, sendSuperLike, getWalletTransactionByDate, buySuperLikes, getSuperlikeOffers, updatePreferences, reportUserById, sendGift, buyGift, blockedUserList, unblockUserById, getGiftsTypes, updateCustomActiveStatus, getCustomActiveStatusByUserId, getRtcToken}
+        console.log("loggedInuserid: ", loggedInUser._id)
+
+        const likedUsersIdsArray = loggedInUser.liked;
+
+        console.log("likedUsersIdsArray: ", likedUsersIdsArray);
+
+        const streamByHostId = await StreamGroup.find({ hostUserId: '675199f28f944ebe7bbabde7' });
+
+        console.log("streamByHostId: ", streamByHostId);
+
+        // get all live streamGroups of liked users
+        const streamGroups = await StreamGroup.find({ hostUserId: { $in: likedUsersIdsArray }, isLive: true });
+
+        return res.status(200).json({ status: 200, streamGroups: streamGroups });
+    } catch (error) {
+        console.log("error: ", error);
+        res.status(500).json({ status: 500, message: 'Failed to fetch liked users stream groups.', error: error });
+    }
+}
+
+const userController = {getUserDetails, createTransaction, getTransactionByDate, uploadImage, signupQuestions, updateUserDetails, deleteUser, getFeed, getMatchedUsers, uploadPics, getNotifications, markAsRead, deleteNotification, addPayment, paymentHistory, blockUserById, sendSuperLike, getWalletTransactionByDate, buySuperLikes, getSuperlikeOffers, updatePreferences, reportUserById, sendGift, buyGift, blockedUserList, unblockUserById, getGiftsTypes, updateCustomActiveStatus, getCustomActiveStatusByUserId, getRtcToken, getLikedUsersStreamGroups}
 export default userController

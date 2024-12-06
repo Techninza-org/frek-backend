@@ -67,5 +67,7 @@ userRouter.get('/transaction', userController.getTransactionByDate)
 
 //@ts-ignore
 userRouter.post('/get-user-rtc-token', userController.getRtcToken)
+//@ts-ignore
+userRouter.get('/getAllLikedUserLiveStreamGroups', userController.getLikedUsersStreamGroups)
 
 export default userRouter
