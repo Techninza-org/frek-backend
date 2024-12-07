@@ -62,7 +62,8 @@ const UserSchema = new Schema({
         type: [{
             giftType: {type: Number, required: true},
             quantity: {type: Number, required: true},
-            datePurchased: {type: Date, default: Date.now}
+            datePurchased: {type: Date, default: Date.now},
+            pricePerQty: {type: Number, required: false},
         }],
         required: false
     },
