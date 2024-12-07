@@ -66,6 +66,10 @@
                     document.getElementById('messages').appendChild(messageElement);
                 });
 
+                // socket.on('streamStatus', (data) => {
+                //     console.log('is Steam Ended:', data.isStreamEnded);
+                // });
+
                 // Listen for group users count
                 socket.on('recieveGroupUsersCount', (data) => {
                     const countMessage = `Group ${data.groupId} has ${data.groupUsersCount} users.`;
