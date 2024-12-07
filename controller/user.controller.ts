@@ -543,7 +543,8 @@ const buyGift = async (req: ExtendedRequest, res: Response, next: NextFunction) 
             if (purchasedGift) {
                 purchasedGift.quantity += quantity;
             } else {
-                user.boughtGifts.push({ giftType, quantity });
+                // user.boughtGifts.push({ giftType, quantity });
+                user.boughtGifts.push({ giftType: giftType, quantity: quantity, pricePerQty: giftPrices[giftType] });
             }
         });
 

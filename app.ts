@@ -377,6 +377,7 @@ export { io, httpsServer, httpServer };
 // import adminRouter from "./routes/admin.routes";
 // import cron from 'node-cron';
 // import { RtcTokenBuilder, RtcRole, RtmTokenBuilder } from "agora-access-token";
+// import { StreamGroup } from "./models/streamGroup";
 // dotenv.config()
 
 // const app = express()
@@ -561,13 +562,23 @@ export { io, httpsServer, httpServer };
 //     })
 
 //     //============= Group Chat Start =============
-//     socket.on('joinGroup', ({ userId, groupId }) => {
+//     socket.on('joinGroup', async ({ userId, groupId }) => {
 
 //         // Store the user’s database ID along with socketId and group information
 //         groupUsers.set(userId, { socketId: socket.id, groupId: groupId })
 
 //         // Add the user to the specified group
 //         socket.join(groupId)
+
+//         const streamGroup = await StreamGroup.findOne({groupId: groupId});
+
+//         // if streamGroup is not found, stop execution
+//         if (!streamGroup) {
+//             console.log(`Stream group ${groupId} not found`);
+//             return;
+//         }
+
+//         console.log(`after if condition`);
 
 //         // Notify other users in the group that a new user has joined
 //         socket.to(groupId).emit('userJoined', { userId })
