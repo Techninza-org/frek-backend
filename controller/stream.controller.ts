@@ -138,7 +138,7 @@ const createStreamGroup = async (req: ExtendedRequest, res: Response, next: Next
 const getAllStreamGroups = async (req: Request, res: Response, next: NextFunction) => {
     try {
         
-        const allStreamGroups = await StreamGroup.find().populate({path: 'hostUserId', select: 'name email gender dob age'}).populate('coHostUserIds').populate('connectedUsers').populate('bouncerUserIds').populate('streamRequestUserIds');
+        const allStreamGroups = await StreamGroup.find().populate({path: 'hostUserId', select: 'name email gender dob age'}).populate('coHostUserIds').populate({ path: 'connectedUsers', select: 'name username avatar gender email'}).populate('bouncerUserIds').populate('streamRequestUserIds');
 
         const allStreamGroupWithConnectedUserCount = allStreamGroups.map((streamGroup) => {
             return {

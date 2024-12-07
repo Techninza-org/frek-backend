@@ -264,6 +264,16 @@ io.on('connection', (socket) => {
                 if (value.socketId === socket.id) {
                     groupUsers.delete(key);
                     console.log(`User ${key} removed from groupUsers | (at the time of disconnect)`);
+
+                    // Remove the user from the group
+                    socket.leave(value.groupId); // Remove the user from the group
+                    io.to(value.groupId).emit('userLeftsFromGroup', { userId: key }); // Notify other users in the group that a user has left
+
+                    const isValidStreamGroupId = mongoose.Types.ObjectId.isValid(value.groupId);
+                    const streamGroup = isValidStreamGroupId ? StreamGroup.findById(value.groupId) : false;
+
+                    console.log("streamGroupFound: ", streamGroup);
+                    
                 }
             });
 
@@ -288,7 +298,6 @@ io.on('connection', (socket) => {
 
         const isValidStreamGroupId = mongoose.Types.ObjectId.isValid(groupId);
         const streamGroup = isValidStreamGroupId ? await StreamGroup.findOne({_id: groupId}) : false;
-
 
         if (streamGroup) {
 
