@@ -20,6 +20,7 @@ import { User } from "./models/user";
 import adminRouter from "./routes/admin.routes";
 import cron from 'node-cron';
 import { RtcTokenBuilder, RtcRole, RtmTokenBuilder } from "agora-access-token";
+import { StreamGroup } from "./models/streamGroup";
 
 dotenv.config()
 
@@ -277,13 +278,31 @@ io.on('connection', (socket) => {
     })
 
     //============= Group Chat Start =============
-    socket.on('joinGroup', ({ userId, groupId }) => {
+    socket.on('joinGroup', async ({ userId, groupId }) => {
 
         // Store the user’s database ID along with socketId and group information
         groupUsers.set(userId, { socketId: socket.id, groupId: groupId })
 
         // Add the user to the specified group
         socket.join(groupId)
+
+        const isValidStreamGroupId = mongoose.Types.ObjectId.isValid(groupId);
+        const streamGroup = isValidStreamGroupId ? await StreamGroup.findOne({_id: groupId}) : false;
+
+
+        if (streamGroup) {
+
+            const isValidUser = mongoose.Types.ObjectId.isValid(userId);
+            const user = isValidUser ? await User.findOne({_id: userId}) : false;
+
+            if (user){
+                streamGroup.connectedUsers.push(user._id);
+                await streamGroup.save();
+            }
+        }
+
+        console.log(`after if condition | entered groupId: ${groupId} | streamGroupfound: ${streamGroup ? true : false} | by userId: ${userId}`);
+
 
         // Notify other users in the group that a new user has joined
         // socket.to(groupId).emit('userJoined', { userId })
@@ -306,7 +325,7 @@ io.on('connection', (socket) => {
     });
 
     // Event: user leave group
-    socket.on('leaveGroup', ({ userId, groupId }) => {
+    socket.on('leaveGroup', async ({ userId, groupId }) => {
         const userSocketInfoFromGroupUsers = groupUsers.get(userId); // Get user info from the 'users' Map using userId (from DB)
 
         if (userSocketInfoFromGroupUsers) {
@@ -315,6 +334,21 @@ io.on('connection', (socket) => {
 
             // Remove the user from the 'users' Map (effectively removing them from the system)
             groupUsers.delete(userId);
+
+            const isValidStreamGroupId = mongoose.Types.ObjectId.isValid(groupId);
+            const streamGroup = isValidStreamGroupId ? await StreamGroup.findOne({_id: groupId}) : false;
+
+            if (streamGroup) {
+                if (streamGroup.connectedUsers.includes(userId)){
+                    streamGroup.connectedUsers.pull(userId);
+                    await streamGroup.save();
+
+                    if (streamGroup.hostUserId == userId){
+                        streamGroup.isLive = false;
+                        await streamGroup.save();
+                    }
+                }
+            }
 
             console.log(`User ${userId} left group ${groupId}`);
 
@@ -581,6 +615,12 @@ export { io, httpsServer, httpServer };
 
 //         if (streamGroup) {
 
+//             // if (streamGroup.isLive == false){
+//             //     socket.to(groupId).emit('streamStatus', { isStreamEnded: true });
+//             //     console.log(`Stream ${groupId} has ended`);
+//             //     return;
+//             // }
+
 //             const isValidUser = mongoose.Types.ObjectId.isValid(userId);
 //             const user = isValidUser ? await User.findOne({_id: userId}) : false;
 
@@ -616,7 +656,7 @@ export { io, httpsServer, httpServer };
 //     });
 
 //     // Event: user leave group
-//     socket.on('leaveGroup', ({ userId, groupId }) => {
+//     socket.on('leaveGroup', async ({ userId, groupId }) => {
 //         const userSocketInfoFromGroupUsers = groupUsers.get(userId); // Get user info from the 'users' Map using userId (from DB)
 
 //         if (userSocketInfoFromGroupUsers) {
@@ -625,6 +665,21 @@ export { io, httpsServer, httpServer };
 
 //             // Remove the user from the 'users' Map (effectively removing them from the system)
 //             groupUsers.delete(userId);
+
+//             const isValidStreamGroupId = mongoose.Types.ObjectId.isValid(groupId);
+//             const streamGroup = isValidStreamGroupId ? await StreamGroup.findOne({_id: groupId}) : false;
+
+//             if (streamGroup) {
+//                 if (streamGroup.connectedUsers.includes(userId)){
+//                     streamGroup.connectedUsers.pull(userId);
+//                     await streamGroup.save();
+
+//                     if (streamGroup.hostUserId == userId){
+//                         streamGroup.isLive = false;
+//                         await streamGroup.save();
+//                     }
+//                 }
+//             }
 
 //             console.log(`User ${userId} left group ${groupId}`);
 
