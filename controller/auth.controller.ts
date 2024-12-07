@@ -32,6 +32,15 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
     const parts = dobString.split('/');
     const year = parts[2];
     const age = new Date().getFullYear() - Number(year);
+
+    const giftWithTypeZero = {giftType: 0, quantity: 0, pricePerQty: 10};
+    const giftWithTypeOne = {giftType: 1, quantity: 0, pricePerQty: 20};
+    const giftWithTypeTwo = {giftType: 2, quantity: 0, pricePerQty: 30};
+    const giftWithTypeThree = {giftType: 3, quantity: 0, pricePerQty: 40};
+    const giftWithTypeFour = {giftType: 4, quantity: 0, pricePerQty: 50};
+    const giftWithTypeFive = {giftType: 5, quantity: 0, pricePerQty: 60};
+
+    const boughtGiftsArray = [giftWithTypeZero, giftWithTypeOne, giftWithTypeTwo, giftWithTypeThree, giftWithTypeFour, giftWithTypeFive];
     
     try{
         const existingUser = await User.findOne({email})
@@ -54,7 +63,8 @@ const signUp = async (req: Request, res: Response, next: NextFunction) => {
             dob: dobString,
             age: age,
             avatar: "https://thefrekapp.com/public/images/1718965492683-default.png",
-            registrationToken: registrationToken
+            registrationToken: registrationToken,
+            boughtGifts: boughtGiftsArray
         })
         const token = jwt.sign({email: req.body.email}, process.env.JWT_SECRET!, {
             expiresIn: '7d'

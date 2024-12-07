@@ -570,15 +570,27 @@ export { io, httpsServer, httpServer };
 //         // Add the user to the specified group
 //         socket.join(groupId)
 
-//         const streamGroup = await StreamGroup.findOne({groupId: groupId});
+//         const isValidStreamGroupId = mongoose.Types.ObjectId.isValid(groupId);
+//         const streamGroup = isValidStreamGroupId ? await StreamGroup.findOne({_id: groupId}) : false;
 
 //         // if streamGroup is not found, stop execution
-//         if (!streamGroup) {
-//             console.log(`Stream group ${groupId} not found`);
-//             return;
+//         // if (!streamGroup) {
+//         //     console.log(`Stream group ${groupId} not found | inside if condition`);
+//         //     return;
+//         // }
+
+//         if (streamGroup) {
+
+//             const isValidUser = mongoose.Types.ObjectId.isValid(userId);
+//             const user = isValidUser ? await User.findOne({_id: userId}) : false;
+
+//             if (user){
+//                 streamGroup.connectedUsers.push(user._id);
+//                 await streamGroup.save();
+//             }
 //         }
 
-//         console.log(`after if condition`);
+//         console.log(`after if condition | entered groupId: ${groupId} | streamGroupfound: ${streamGroup ? true : false} | by userId: ${userId}`);
 
 //         // Notify other users in the group that a new user has joined
 //         socket.to(groupId).emit('userJoined', { userId })
