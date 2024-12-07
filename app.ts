@@ -252,6 +252,27 @@ io.on('connection', (socket) => {
                 delete userSocketMap[key]
             }
         }
+
+                //======== logic for group chat start here =========
+
+        // Remove the user from the 'users' Map
+
+        if (groupUsers.size > 0){
+
+            groupUsers.forEach((value, key) => {
+                if (value.socketId === socket.id) {
+                    groupUsers.delete(key);
+                    console.log(`User ${key} removed from groupUsers | (at the time of disconnect)`);
+                }
+            });
+
+            //print all users in the group
+            console.log(`Users in group (at time of disconnect, after leaving) : ${groupUsers.size}`);
+        }
+        
+        //======== logic for group chat ends here =========
+
+
         io.emit('getOnlineUsers', Object.keys(userSocketMap))
     })
 
@@ -296,6 +317,10 @@ io.on('connection', (socket) => {
             groupUsers.delete(userId);
 
             console.log(`User ${userId} left group ${groupId}`);
+
+            //print all users in the group
+            console.log(`Users in group (at time of leave, after leaving) ${groupId}: ${groupUsers.size}`);
+            
         } else {
             console.log(`User ${userId} not found in group ${groupId} | inside leaveGroup`);
         }
@@ -512,6 +537,26 @@ export { io, httpsServer, httpServer };
 //                 delete userSocketMap[key]
 //             }
 //         }
+
+//         //======== logic for group chat start here =========
+
+//         // Remove the user from the 'users' Map
+
+//         if (groupUsers.size > 0){
+
+//             groupUsers.forEach((value, key) => {
+//                 if (value.socketId === socket.id) {
+//                     groupUsers.delete(key);
+//                     console.log(`User ${key} removed from groupUsers | (at the time of disconnect)`);
+//                 }
+//             });
+
+//             //print all users in the group
+//             console.log(`Users in group (at time of disconnect, after leaving) : ${groupUsers.size}`);
+//         }
+        
+//         //======== logic for group chat ends here =========
+
 //         io.emit('getOnlineUsers', Object.keys(userSocketMap))
 //     })
 
@@ -527,6 +572,9 @@ export { io, httpsServer, httpServer };
 //         // Notify other users in the group that a new user has joined
 //         socket.to(groupId).emit('userJoined', { userId })
 //         console.log(`User ${userId} joined group ${groupId}`)
+
+//         //print all users in the group
+//         console.log(`Users in group ${groupId}: ${groupUsers.size}`);
 //     });
 
 //     // Event: User sends a message to the group
@@ -556,6 +604,9 @@ export { io, httpsServer, httpServer };
 //             groupUsers.delete(userId);
 
 //             console.log(`User ${userId} left group ${groupId}`);
+
+//             //print all users in the group
+//             console.log(`Users in group (at time of leave, after leaving) ${groupId}: ${groupUsers.size}`);
 //         } else {
 //             console.log(`User ${userId} not found in group ${groupId} | inside leaveGroup`);
 //         }

@@ -14,8 +14,12 @@
     <input type="text" id="userId" placeholder="Enter User ID" />
     <button id="connectBtn">Connect</button>
 
+    <!-- Input for Group ID -->
+    <label for="groupId">Enter Group ID: </label>
+    <input type="text" id="groupId" placeholder="Enter Group ID" disabled />
+
     <div id="messages"></div>
-    
+
     <button id="joinGroupBtn" disabled>Join Group</button>
     <button id="leaveGroupBtn" disabled>Leave Group</button>
     <button id="getUserCountBtn" disabled>Get User Count</button>
@@ -34,10 +38,11 @@
                 // Disable inputs after connecting
                 document.getElementById('userId').disabled = true;
                 document.getElementById('connectBtn').disabled = true;
+                document.getElementById('groupId').disabled = false;
 
                 // Connect to Socket.io server
-                // socket = io('http://localhost:3000', {
-                socket = io('https://thefrekapp.com', {
+                // socket = io('https://thefrekapp.com', {
+                socket = io('http://localhost:3000', {
                     query: {
                         userId: userId
                     }
@@ -63,8 +68,8 @@
 
                 // Listen for group users count
                 socket.on('recieveGroupUsersCount', (data) => {
-                    const countMessage = `Group ${groupId} has ${data.groupUsersCount} users.`;
-                    
+                    const countMessage = `Group ${data.groupId} has ${data.groupUsersCount} users.`;
+
                     // Print in console
                     console.log(countMessage);
 
@@ -80,6 +85,7 @@
 
         // Function to enable chat features after connection
         function enableChatFeatures() {
+            document.getElementById('groupId').disabled = false;
             document.getElementById('joinGroupBtn').disabled = false;
             document.getElementById('leaveGroupBtn').disabled = false;
             document.getElementById('getUserCountBtn').disabled = false;
@@ -87,31 +93,53 @@
             document.getElementById('sendMessageBtn').disabled = false;
         }
 
-        // const groupId = 'group1'; // Example group ID used for all group-related actions
-        const groupId = '6752e3f579c44135f8fbdb64'; // Example group ID used for all group-related actions
+        // Get dynamic group ID
+        function getGroupId() {
+            return document.getElementById('groupId').value.trim();
+        }
 
         // Join group functionality
         document.getElementById('joinGroupBtn').addEventListener('click', () => {
-            socket.emit('joinGroup', { userId, groupId });
-            console.log('User joined the group');
+            const groupId = getGroupId();
+            if (groupId) {
+                socket.emit('joinGroup', { userId, groupId });
+                console.log(`User joined group: ${groupId}`);
+            } else {
+                alert('Please enter a valid Group ID');
+            }
         });
 
         // Leave group functionality
         document.getElementById('leaveGroupBtn').addEventListener('click', () => {
-            socket.emit('leaveGroup', { userId, groupId });
-            console.log('User left the group');
+            const groupId = getGroupId();
+            if (groupId) {
+                socket.emit('leaveGroup', { userId, groupId });
+                console.log(`User left group: ${groupId}`);
+            } else {
+                alert('Please enter a valid Group ID');
+            }
         });
 
         // Get the number of users in a group
         document.getElementById('getUserCountBtn').addEventListener('click', () => {
-            socket.emit('groupUsersCount', { groupId });
+            const groupId = getGroupId();
+            if (groupId) {
+                socket.emit('groupUsersCount', { groupId });
+            } else {
+                alert('Please enter a valid Group ID');
+            }
         });
 
         // Send message to group
         document.getElementById('sendMessageBtn').addEventListener('click', () => {
+            const groupId = getGroupId();
             const message = document.getElementById('messageInput').value;
-            socket.emit('sendGroupMessage', { userId, groupId, groupMessage: message });
-            document.getElementById('messageInput').value = ''; // Clear the input
+            if (groupId && message) {
+                socket.emit('sendGroupMessage', { userId, groupId, groupMessage: message });
+                document.getElementById('messageInput').value = ''; // Clear the input
+            } else {
+                alert('Please enter a valid Group ID and message');
+            }
         });
     </script>
 </body>
