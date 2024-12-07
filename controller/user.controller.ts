@@ -24,6 +24,42 @@ const getUserDetails = async (req: ExtendedRequest, res: Response, next: NextFun
     user.blocked = undefined
     user.matched = undefined
     user.reportedBy = undefined
+
+    if(user.boughtGifts.length > 0){
+
+        //set latest price for each gift type (just for response, do not store it in db)
+        const priceOfGiftTypeZero = 10;
+        const priceOfGiftTypeOne = 20;
+        const priceOfGiftTypeTwo = 30;
+        const priceOfGiftTypeThree = 40;
+        const priceOfGiftTypeFour = 50;
+        const priceOfGiftTypeFive = 60;
+
+        for(let i = 0; i < user.boughtGifts.length; i++){
+            switch(user.boughtGifts[i].giftType){
+                case 0:
+                    user.boughtGifts[i].pricePerQty = priceOfGiftTypeZero;
+                    break;
+                case 1:
+                    user.boughtGifts[i].pricePerQty = priceOfGiftTypeOne;
+                    break;
+                case 2:
+                    user.boughtGifts[i].pricePerQty = priceOfGiftTypeTwo;
+                    break;
+                case 3:
+                    user.boughtGifts[i].pricePerQty = priceOfGiftTypeThree;
+                    break;
+                case 4:
+                    user.boughtGifts[i].pricePerQty = priceOfGiftTypeFour;
+                    break;
+                case 5:
+                    user.boughtGifts[i].pricePerQty = priceOfGiftTypeFive;
+                    break;
+            }
+        }
+
+        return res.status(200).send({valid: true, user: user })
+    }
     return res.status(200).send({valid: true, user: user })
 }
 
