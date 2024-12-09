@@ -197,7 +197,7 @@ const getFeed = async (req: ExtendedRequest, res: Response, next: NextFunction) 
 
         return res.status(200).send({feed: feed, totalPages: feed, totalCountUser: feed.length});
     }catch(error){
-        return res.status(400).send({message: 'Error fetching feed'})
+        return res.status(400).send({message: 'Error fetching feed', error: error})
     }
 }
 
