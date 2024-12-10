@@ -276,10 +276,13 @@ io.on('connection', (socket) => {
 
                     //==== remove user from streamGroup connectedUsers array ====
                     const userId = key;
-                    const groups = await StreamGroup.find({isLIve: true, connectedUsers: { $in: userId }}); // get all groups where connectedUsers array contains userId
+                    const groups = await StreamGroup.find({ isLive: true, connectedUsers: { $in: userId }}).select('connectedUsers'); // get all groups where connectedUsers array contains userId
+
+                    console.log("userId: ", userId);
+                    console.log("groups: ", groups);
 
                     for (const group of groups){
-                        if (group.connectedUsers.includes(userId)){
+                        // if (group.connectedUsers.includes(userId)){
                             group.connectedUsers.pull(userId);
                             await group.save();
 
@@ -287,7 +290,7 @@ io.on('connection', (socket) => {
                                 group.isLive = false;
                                 await group.save();
                             }
-                        }
+                        // }
                     }
                     //================================================================
                     
@@ -591,7 +594,7 @@ export { io, httpsServer, httpServer };
 
 //     io.emit('getOnlineUsers', Object.keys(userSocketMap))
 
-//     socket.on('disconnect', () => {
+//     socket.on('disconnect', async () => {
 //         console.log('user disconnected', socket.id);
 //         for(const key in userSocketMap){
 //             if(userSocketMap[key] === socket.id){
@@ -599,16 +602,46 @@ export { io, httpsServer, httpServer };
 //             }
 //         }
 
-//         //======== logic for group chat start here =========
+//                 //======== logic for group chat start here =========
 
 //         // Remove the user from the 'users' Map
 
 //         if (groupUsers.size > 0){
 
-//             groupUsers.forEach((value, key) => {
+//             groupUsers.forEach( async (value, key) => {
 //                 if (value.socketId === socket.id) {
 //                     groupUsers.delete(key);
 //                     console.log(`User ${key} removed from groupUsers | (at the time of disconnect)`);
+
+//                     // Remove the user from the group
+//                     socket.leave(value.groupId); // Remove the user from the group
+//                     io.to(value.groupId).emit('userLeftsFromGroup', { userId: key }); // Notify other users in the group that a user has left
+
+//                     const isValidStreamGroupId = mongoose.Types.ObjectId.isValid(value.groupId);
+//                     const streamGroup = isValidStreamGroupId ? StreamGroup.findById(value.groupId) : false;
+
+//                     console.log("streamGroupFound: ", streamGroup);
+
+//                     //==== remove user from streamGroup connectedUsers array ====
+//                     const userId = key;
+//                     const groups = await StreamGroup.find({ isLive: true, connectedUsers: { $in: userId }}).select('connectedUsers'); // get all groups where connectedUsers array contains userId
+
+//                     console.log("userId: ", userId);
+//                     console.log("groups: ", groups);
+
+//                     for (const group of groups){
+//                         // if (group.connectedUsers.includes(userId)){
+//                             group.connectedUsers.pull(userId);
+//                             await group.save();
+
+//                             if (group.hostUserId == userId){
+//                                 group.isLive = false;
+//                                 await group.save();
+//                             }
+//                         // }
+//                     }
+//                     //================================================================
+                    
 //                 }
 //             });
 
@@ -617,6 +650,7 @@ export { io, httpsServer, httpServer };
 //         }
         
 //         //======== logic for group chat ends here =========
+
 
 //         io.emit('getOnlineUsers', Object.keys(userSocketMap))
 //     })
