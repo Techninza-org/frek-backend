@@ -789,16 +789,19 @@ const getTransactionByDate = async (req: ExtendedRequest, res: Response, next: N
 //get rtc token
 
 const getRtcToken = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
-    const { channelName, uid, role = "PUBLISHER", tokenExpiration = 3600 * 24 * 7 } = req.body;
+    const { channelName, uid, role = "PUBLISHER", tokenExpiration = 3600 } = req.body;
     const user = req.user;
+    const previlegeExpireTime = 3600;
   
     // Validate input
     if (!channelName || uid == null) {
       return res.status(400).json({ error: "channelName and uid are required" });
     }
   
-    const appId = process.env.AGORA_APP_ID || '0ad2acf092ca4c088f5f00e41e170286';
-    const appCertificate = process.env.AGORA_APP_CERTIFICATE || 'c8300f5918aa498b90cbd74c880022c0';
+    // const appId = process.env.AGORA_APP_ID || '0ad2acf092ca4c088f5f00e41e170286';
+    const appId = '0ad2acf092ca4c088f5f00e41e170286';
+    // const appCertificate = process.env.AGORA_APP_CERTIFICATE || 'c8300f5918aa498b90cbd74c880022c0';
+    const appCertificate = 'c8300f5918aa498b90cbd74c880022c0';
   
     if (!appId || !appCertificate) {
       return res.status(500).json({ error: "AGORA_APP_ID or AGORA_APP_CERTIFICATE not set in environment variables" });
@@ -840,6 +843,8 @@ const getRtcToken = async (req: ExtendedRequest, res: Response, next: NextFuncti
         if (!isRtcTokenPresent) { // 
 
             console.log("inside if rtc not present in user object")
+
+            console.log(`appId: ${appId}, appCertificate: ${appCertificate}, channelName: ${channelName}, uid: ${uid}, rtcRole: ${rtcRole}, tokenExpiration: ${tokenExpiration}`)
 
             const token = RtcTokenBuilder.buildTokenWithUid(
                 appId,
