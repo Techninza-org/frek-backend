@@ -246,7 +246,7 @@ io.on('connection', (socket) => {
 
     io.emit('getOnlineUsers', Object.keys(userSocketMap))
 
-    socket.on('disconnect', () => {
+    socket.on('disconnect', async () => {
         console.log('user disconnected', socket.id);
         for(const key in userSocketMap){
             if(userSocketMap[key] === socket.id){
@@ -260,7 +260,7 @@ io.on('connection', (socket) => {
 
         if (groupUsers.size > 0){
 
-            groupUsers.forEach((value, key) => {
+            groupUsers.forEach( async (value, key) => {
                 if (value.socketId === socket.id) {
                     groupUsers.delete(key);
                     console.log(`User ${key} removed from groupUsers | (at the time of disconnect)`);
@@ -273,6 +273,23 @@ io.on('connection', (socket) => {
                     const streamGroup = isValidStreamGroupId ? StreamGroup.findById(value.groupId) : false;
 
                     console.log("streamGroupFound: ", streamGroup);
+
+                    //==== remove user from streamGroup connectedUsers array ====
+                    const userId = key;
+                    const groups = await StreamGroup.find({isLIve: true, connectedUsers: { $in: userId }}); // get all groups where connectedUsers array contains userId
+
+                    for (const group of groups){
+                        if (group.connectedUsers.includes(userId)){
+                            group.connectedUsers.pull(userId);
+                            await group.save();
+
+                            if (group.hostUserId == userId){
+                                group.isLive = false;
+                                await group.save();
+                            }
+                        }
+                    }
+                    //================================================================
                     
                 }
             });
