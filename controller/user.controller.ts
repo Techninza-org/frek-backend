@@ -497,7 +497,10 @@ const getSuperlikeOffers = async (
         { id: 2, superlikes: 6000, price: 50 },
         { id: 3, superlikes: 9000, price: 80 },
       ];
-      return res.status(200).send({ message: "Superlike offers", offers });
+
+      const pricePerSuperLike = 0.0075;
+    //   return res.status(200).send({ message: "Superlike offers", offers });
+      return res.status(200).send({ message: "Superlike offers", offers: offers, pricePerSuperLike: pricePerSuperLike });
     } catch (err) {
       return next(err);
     }
@@ -871,7 +874,7 @@ const getRtcToken = async (req: ExtendedRequest, res: Response, next: NextFuncti
             //getting index of the channelName in the array
             let index = user.rtcToken.findIndex((x: any) => x.channelName === channelName);
             
-            if (user.rtcToken[index].createdAt + ( 3600 * 24 * 7 ) < Date.now()) { // if token is older than 24 hours 
+            if (user.rtcToken[index].createdAt + ( 3600 ) < Date.now()) { // if token is older than 24 hours 
 
                 console.log("inside if rtc is present in user object and is older than 24 hours")
 
