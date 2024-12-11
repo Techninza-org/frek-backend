@@ -8,6 +8,7 @@ import { getUserToken } from '../app'
 import { Reported } from '../models/reported'
 import { Transaction } from '../models/transaction'
 import { DatabaseConstant } from '../models/databaseConstant'
+import { Package } from '../models/packages'
 
 const adminSignup = async (req: Request, res: Response, next: NextFunction) => {
     const isValidPaylod = helper.isValidatePaylod(req.body, ['name', 'email', 'password'])
@@ -143,5 +144,31 @@ const getDbConstants = async (req: ExtendedRequest, res: Response, next: NextFun
     }
 };
 
-const adminController = { adminSignup, adminLogin, getAllUsers, switchActiveUser, getUserPosts, getReports, getTransactions, setDbConstant, getDbConstants }
+const createPackage = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    const {superlikes, price} = req.body;
+
+    if (!superlikes || isNaN(superlikes)) { return res.status(400).send({message: 'superlikes should be a number', invalidSuperlikes: true, status: 400}) }
+    if (!price || isNaN(price)) { return res.status(400).send({message: 'price should be a number', invalidPrice: true, status: 400}) }
+
+    try {
+        
+        const newPackage = await Package.create({superlikes: superlikes, price: price});
+        return res.status(200).send({message: 'Package created successfully', status: 200, package: newPackage})
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send({message: 'Error creating package', error: error, status: 500})
+    }
+}
+
+const getAllPackages = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    try {
+        const packages = await Package.find();
+        return res.status(200).send({message: 'Packages fetched successfully', status: 200, packages: packages})
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send({message: 'Error fetching packages', error: error, status: 500})
+    }
+};
+
+const adminController = { adminSignup, adminLogin, getAllUsers, switchActiveUser, getUserPosts, getReports, getTransactions, setDbConstant, getDbConstants, createPackage, getAllPackages }
 export default adminController

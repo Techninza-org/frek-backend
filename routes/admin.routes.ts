@@ -20,6 +20,10 @@ adminRouter.get('/report', middleware.AuthMiddleware, adminController.getReports
 adminRouter.put('/setDbConstant', middleware.AuthMiddleware, adminController.setDbConstant)
 //@ts-ignore
 adminRouter.get('/getDbConstants', middleware.AuthMiddleware, adminController.getDbConstants)
+//@ts-ignore
+adminRouter.post('/createPackage', middleware.AuthMiddleware, adminController.createPackage)
+//@ts-ignore
+adminRouter.get('/getAllPackages', middleware.AuthMiddleware, adminController.getAllPackages)
 
 
 export default adminRouter
