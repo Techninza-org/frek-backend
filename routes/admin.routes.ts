@@ -16,6 +16,10 @@ adminRouter.put('/user/:id', middleware.AuthMiddleware, adminController.switchAc
 adminRouter.get('/transaction', middleware.AuthMiddleware, adminController.getTransactions)
 //@ts-ignore
 adminRouter.get('/report', middleware.AuthMiddleware, adminController.getReports)
+//@ts-ignore
+adminRouter.put('/setDbConstant', middleware.AuthMiddleware, adminController.setDbConstant)
+//@ts-ignore
+adminRouter.get('/getDbConstants', middleware.AuthMiddleware, adminController.getDbConstants)
 
 
 export default adminRouter

@@ -107,7 +107,7 @@ const getTransactions = async (req: ExtendedRequest, res: Response, next: NextFu
     }
 }
 
-const setPerSuperLikePrice = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+const setDbConstant = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     const { perSuperLikePrice } = req.body;
 
     if (!perSuperLikePrice || isNaN(perSuperLikePrice)) { return res.status(400).send({message: 'price should be a number', invalidPrice: true, status: 400}) }
@@ -130,18 +130,18 @@ const setPerSuperLikePrice = async (req: ExtendedRequest, res: Response, next: N
     }
 }
 
-const getPerSuperLikePrice = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+const getDbConstants = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     try {
         
         const databaseConstant = await DatabaseConstant.findOne();
         if (!databaseConstant){ return res.status(200).send({message: 'document not found in database, please set in first from admin panel', status: 200}) }
 
-        return res.status(200).send({message: 'Superlike price fetched successfully', status: 200, perSuperLikePrice: databaseConstant.perSuperLikePrice})
+        return res.status(200).send({message: 'Superlike price fetched successfully', status: 200, getDbConstants: databaseConstant})
     } catch (error) {
         console.log(error);
         return res.status(500).send({message: 'Error fetching superlike price', error: error, status: 500})
     }
 };
 
-const adminController = { adminSignup, adminLogin, getAllUsers, switchActiveUser, getUserPosts, getReports, getTransactions, setPerSuperLikePrice, getPerSuperLikePrice }
+const adminController = { adminSignup, adminLogin, getAllUsers, switchActiveUser, getUserPosts, getReports, getTransactions, setDbConstant, getDbConstants }
 export default adminController
