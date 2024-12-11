@@ -12,6 +12,7 @@ import { Transaction } from "../models/transaction"
 
 import { RtcTokenBuilder, RtcRole, RtmTokenBuilder } from "agora-access-token";
 import { StreamGroup } from "../models/streamGroup"
+import { DatabaseConstant } from "../models/databaseConstant"
 
 const getUserDetails = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     //update last seen 
@@ -498,7 +499,12 @@ const getSuperlikeOffers = async (
         { id: 3, superlikes: 9000, price: 80 },
       ];
 
-      const pricePerSuperLike = 0.0075;
+      const mostExpensivePackage = offers[0];
+
+      const databaseConstant = await DatabaseConstant.findOne();
+      const pricePerSuperLike = databaseConstant.perSuperLikePrice || (mostExpensivePackage.price / mostExpensivePackage.superlikes);
+
+      console.log(`databsePerSuperLikePrice: ${databaseConstant.perSuperLikePrice} | static mostExpensivePacakeSuperLikePrice: ${mostExpensivePackage.price / mostExpensivePackage.superlikes}`);
     //   return res.status(200).send({ message: "Superlike offers", offers });
       return res.status(200).send({ message: "Superlike offers", offers: offers, pricePerSuperLike: pricePerSuperLike });
     } catch (err) {

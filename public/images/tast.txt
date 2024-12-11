@@ -4,4 +4,4 @@ count of connectedUsers
 show only live streamGroup
 short streamGroup on basis on connectedUsers in descending order
 
-superLike 
+perSuperLikeCount in get offer api

@@ -7,6 +7,7 @@ import { ExtendedRequest } from '../utils/middleware'
 import { getUserToken } from '../app'
 import { Reported } from '../models/reported'
 import { Transaction } from '../models/transaction'
+import { DatabaseConstant } from '../models/databaseConstant'
 
 const adminSignup = async (req: Request, res: Response, next: NextFunction) => {
     const isValidPaylod = helper.isValidatePaylod(req.body, ['name', 'email', 'password'])
@@ -106,5 +107,41 @@ const getTransactions = async (req: ExtendedRequest, res: Response, next: NextFu
     }
 }
 
-const adminController = { adminSignup, adminLogin, getAllUsers, switchActiveUser, getUserPosts, getReports, getTransactions }
+const setPerSuperLikePrice = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    const { perSuperLikePrice } = req.body;
+
+    if (!perSuperLikePrice || isNaN(perSuperLikePrice)) { return res.status(400).send({message: 'price should be a number', invalidPrice: true, status: 400}) }
+
+    try {
+        
+        const databaseConstant = await DatabaseConstant.findOne();
+
+        if (!databaseConstant){
+            const newDatabaseConstant = await DatabaseConstant.create({perSuperLikePrice: perSuperLikePrice});
+            return res.status(200).send({message: 'Superlike price created successfully', status: 200, constants: newDatabaseConstant})
+        }else{
+            databaseConstant.perSuperLikePrice = perSuperLikePrice;
+            await databaseConstant.save();
+            return res.status(200).send({message: 'Superlike price updated successfully', status: 200, constants: databaseConstant})
+        }
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send({message: 'Error setting superlike price', error: error, status: 500})
+    }
+}
+
+const getPerSuperLikePrice = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    try {
+        
+        const databaseConstant = await DatabaseConstant.findOne();
+        if (!databaseConstant){ return res.status(200).send({message: 'document not found in database, please set in first from admin panel', status: 200}) }
+
+        return res.status(200).send({message: 'Superlike price fetched successfully', status: 200, perSuperLikePrice: databaseConstant.perSuperLikePrice})
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send({message: 'Error fetching superlike price', error: error, status: 500})
+    }
+};
+
+const adminController = { adminSignup, adminLogin, getAllUsers, switchActiveUser, getUserPosts, getReports, getTransactions, setPerSuperLikePrice, getPerSuperLikePrice }
 export default adminController
