@@ -12,7 +12,8 @@ const client: Twilio = twilio(accountSid, authToken);
 export const sendTwilioOtp = async (sentTo: string, body: string): Promise<void> => {
   try {
     const message = await client.messages.create({
-      body: 'You have an appointment with Owl, Inc. on Friday, November 3 at 4:00 PM. Reply C to confirm.',
+      // body: 'You have an appointment with Owl, Inc. on Friday, November 3 at 4:00 PM. Reply C to confirm.',
+      body: body,
     //   messagingServiceSid: 'MGXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', // Your Messaging Service SID here
       messagingServiceSid: messagingServiceSid, // Your Messaging Service SID here
       to: sentTo, // Example Nigerian number with country code +234
