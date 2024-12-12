@@ -24,6 +24,12 @@ adminRouter.get('/getDbConstants', middleware.AuthMiddleware, adminController.ge
 adminRouter.post('/createPackage', middleware.AuthMiddleware, adminController.createPackage)
 //@ts-ignore
 adminRouter.get('/getAllPackages', middleware.AuthMiddleware, adminController.getAllPackages)
+//@ts-ignore
+adminRouter.put('/updatePackage/:packageId', middleware.AuthMiddleware, adminController.updatePackage)
+//@ts-ignore
+adminRouter.delete('/deletePackage/:packageId', middleware.AuthMiddleware, adminController.deletePackage)
+//@ts-ignore
+adminRouter.delete('/deleteDbConstant', middleware.AuthMiddleware, adminController.deleteDbConstants)
 
 
 export default adminRouter
