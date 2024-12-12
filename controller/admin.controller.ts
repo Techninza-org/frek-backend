@@ -9,6 +9,7 @@ import { Reported } from '../models/reported'
 import { Transaction } from '../models/transaction'
 import { DatabaseConstant } from '../models/databaseConstant'
 import { Package } from '../models/packages'
+import mongoose from 'mongoose'
 
 const adminSignup = async (req: Request, res: Response, next: NextFunction) => {
     const isValidPaylod = helper.isValidatePaylod(req.body, ['name', 'email', 'password'])
@@ -144,6 +145,21 @@ const getDbConstants = async (req: ExtendedRequest, res: Response, next: NextFun
     }
 };
 
+const deleteDbConstants = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    try {
+        
+        const databaseConstant = await DatabaseConstant.findOne();
+        if (!databaseConstant){ return res.status(200).send({message: 'document not found in database, please set in first from admin panel', status: 200}) }
+
+        await databaseConstant.deleteOne();
+
+        return res.status(200).send({message: 'Superlike price deleted successfully', status: 200})
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send({message: 'Error deleting superlike price', error: error, status: 500})
+    }
+};
+
 const createPackage = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     const {superlikes, price} = req.body;
 
@@ -170,5 +186,48 @@ const getAllPackages = async (req: ExtendedRequest, res: Response, next: NextFun
     }
 };
 
-const adminController = { adminSignup, adminLogin, getAllUsers, switchActiveUser, getUserPosts, getReports, getTransactions, setDbConstant, getDbConstants, createPackage, getAllPackages }
+const updatePackage = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    const {packageId} = req.params;
+    const {superlikes, price} = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(packageId)) { return res.status(400).send({message: 'Invalid package id', invalidPackageId: true, status: 400}) }
+    if (!superlikes || isNaN(superlikes)) { return res.status(400).send({message: 'superlikes should be a number', invalidSuperlikes: true, status: 400}) }
+    if (!price || isNaN(price)) { return res.status(400).send({message: 'price should be a number', invalidPrice: true, status: 400}) }
+
+    try {
+        
+        const packageById = await Package.findById(packageId);
+        if (!packageById){ return res.status(400).send({message: 'Package not found', status: 400}) }
+
+        packageById.superlikes = superlikes;
+        packageById.price = price;
+        await packageById.save();
+
+        return res.status(200).send({message: 'Package updated successfully', status: 200, package: packageById})
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send({message: 'Error updating package', error: error, status: 500});
+    }
+};
+
+const deletePackage = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
+    const {packageId} = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(packageId)) { return res.status(400).send({message: 'Invalid package id', invalidPackageId: true, status: 400}) }
+
+    try {
+        
+        const packageById = await Package.findById(packageId);
+        if (!packageById){ return res.status(400).send({message: 'Package not found', status: 400}) }
+
+        await packageById.deleteOne();
+
+        return res.status(200).send({message: 'Package deleted successfully', status: 200})
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send({message: 'Error deleting package', error: error, status: 500});
+    }
+};
+
+const adminController = { adminSignup, adminLogin, getAllUsers, switchActiveUser, getUserPosts, getReports, getTransactions, setDbConstant, getDbConstants, createPackage, getAllPackages, updatePackage, deletePackage, deleteDbConstants }
 export default adminController
