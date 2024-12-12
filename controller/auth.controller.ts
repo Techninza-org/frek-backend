@@ -6,6 +6,7 @@ import jwt from 'jsonwebtoken'
 import { ExtendedRequest } from '../utils/middleware'
 import { getUserToken, sendNotif, sendNotification } from '../app'
 import { Otp } from '../models/otp'
+import { sendTwilioOtp } from '../utils/twilioSms'
 
 const signUp = async (req: Request, res: Response, next: NextFunction) => {
     const isValidPayload = helper.isValidatePaylod(req.body, ['name', 'email', 'password', 'gender', 'dob', 'username'])
@@ -209,14 +210,20 @@ const sendSignUpOtp = async (req: Request, res: Response, next: NextFunction) =>
         const isPhoneExist = await User.findOne({ phone: phone, countryPhoneCode: countryPhoneCode });
         if (isPhoneExist) { return res.status(400).send({ error: 'phone number already exists', isPhoneExist: true, status: 400 }); }
 
-        const signUpOtp = 123456;
+        // const signUpOtp = 123456;
+        const signUpOtp = Math.floor(100000 + Math.random() * 900000);
 
         const isOtpExistByPhone = await Otp.findOne({ phone: phone, countryPhoneCode: countryPhoneCode, otpType: 1 }); // 1: signup
         if (isOtpExistByPhone) {
             const updateOtp = await Otp.findOneAndUpdate({ phone: phone, countryPhoneCode: countryPhoneCode, otpType: 1 }, { otp: signUpOtp });
+
+            //send otp by twilio
+            await sendTwilioOtp(`+${updateOtp.countryPhoneCode}${updateOtp.phone}`, `Your Frek App OTP for SignUp is ${signUpOtp}`);
             return res.status(200).send({ message: `OTP re-sent successfully on phone +${updateOtp.countryPhoneCode} ${updateOtp.phone}`, status: 200 });
         }
+
         const createOtp = await Otp.create({ phone: phone, countryPhoneCode: countryPhoneCode, otp: signUpOtp, otpType: 1 }); // 1: signup
+        await sendTwilioOtp(`+${createOtp.countryPhoneCode}${createOtp.phone}`, `Your Frek App OTP for SignUp is ${signUpOtp}`);
 
         return res.status(200).send({ message: `OTP sent successfully on phone +${createOtp.countryPhoneCode} ${createOtp.phone}`, status: 200 });
     } catch (error) {
@@ -241,16 +248,23 @@ const SendOtp = async (req: Request, res: Response, _next: NextFunction) => {
             const isPhoneExist = await User.findOne({ phone: phone, countryPhoneCode: countryPhoneCode });
             if (!isPhoneExist) { return res.status(400).send({ status: 404, error: 'Not found', error_description: 'Phone not found in database' }); }
 
-            const otp = 123456;
+            // const otp = 123456;
+            const otp = Math.floor(100000 + Math.random() * 900000);
 
             const isPhoneOtpExist = await Otp.findOne({ phone: phone , countryPhoneCode: countryPhoneCode, otpType: 2 }); // 2: update
 
             if (isPhoneOtpExist) {
                 const updateOtpForMobile = await Otp.findOneAndUpdate({ phone: phone, countryPhoneCode: countryPhoneCode, otpType: 2 }, { otp });
+
+                //send otp by twilio
+                await sendTwilioOtp(`+${updateOtpForMobile.countryPhoneCode}${updateOtpForMobile.phone}`, `Your Frek App OTP is ${otp}`);
                 return res.status(200).send({ status: 200, message: `OTP re-sent successfully for password on phone +${updateOtpForMobile.countryPhoneCode} ${updateOtpForMobile.phone}` });
             }
 
             const createOtpForMobile = await Otp.create({ phone: phone, countryPhoneCode: countryPhoneCode, otp, otpType: 2 }); // 2: update
+
+            //send otp by twilio
+            await sendTwilioOtp(`+${createOtpForMobile.countryPhoneCode}${createOtpForMobile.phone}`, `Your Frek App OTP is ${otp}`);
             return res.status(200).send({ status: 200, message: `OTP sent successfully for password on phone +${createOtpForMobile.countryPhoneCode} ${createOtpForMobile.phone}` });
         }
 
