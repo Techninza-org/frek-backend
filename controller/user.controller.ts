@@ -929,7 +929,9 @@ const getRtcToken = async (req: ExtendedRequest, res: Response, next: NextFuncti
                 );
                 
                 // user.rtcToken = {token: token, channelName: channelName};
-                user.rtcToken[index] = {token: token, channelName: channelName};
+                // user.rtcToken[index] = {token: token, channelName: channelName};
+                user.rtcToken[index].createdAt = Date.now();
+                user.rtcToken[index].token = token;
                 await user.save();
 
                 return res.json({ token: token });
