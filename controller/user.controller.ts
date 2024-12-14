@@ -882,8 +882,8 @@ const getRtcToken = async (req: ExtendedRequest, res: Response, next: NextFuncti
                 staticUid,
                 rtcRole,
                 // role1,
-                tokenExpiration,
-                privilegeExpirationInSecond // addedLater
+                tokenExpiration * 24,
+                privilegeExpirationInSecond * 24 // addedLater
             );
 
             // user.rtcToken = { token: token, channelName: channelName };
@@ -924,8 +924,8 @@ const getRtcToken = async (req: ExtendedRequest, res: Response, next: NextFuncti
                     staticUid,
                     rtcRole,
                     // role1,
-                    tokenExpiration,
-                    privilegeExpirationInSecond // addedLater
+                    tokenExpiration * 24,
+                    privilegeExpirationInSecond * 24 // addedLater
                 );
                 
                 // user.rtcToken = {token: token, channelName: channelName};
