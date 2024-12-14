@@ -821,9 +821,8 @@ const getRtcToken = async (req: ExtendedRequest, res: Response, next: NextFuncti
     //============
   
     // Validate input
-    if (!channelName || uid == null) {
-      return res.status(400).json({ error: "channelName and uid are required" });
-    }
+    // if (!channelName || uid == null) {return res.status(400).json({ error: "channelName and uid are required" });}
+    if (!channelName) {return res.status(400).json({ error: "channelName is required" });}
   
     const appId = process.env.AGORA_APP_ID || '0ad2acf092ca4c088f5f00e41e170286';
     const appCertificate = process.env.AGORA_APP_CERTIFICATE || 'c8300f5918aa498b90cbd74c880022c0';
@@ -836,7 +835,7 @@ const getRtcToken = async (req: ExtendedRequest, res: Response, next: NextFuncti
     // const rtcRole = role === "SUBSCRIBER" ? RtcRole.SUBSCRIBER : RtcRole.PUBLISHER;
     const rtcRole = role === "SUBSCRIBER" ? Role.SUBSCRIBER : Role.PUBLISHER;
 
-    console.log(`appId: ${appId}, appCertificate: ${appCertificate}, channelName: ${channelName}, uid: ${uid}, rtcRole: ${rtcRole}, tokenExpiration: ${tokenExpiration}, previlegeExpireTime: ${previlegeExpireTime}`)
+    console.log(`appId: ${appId}, appCertificate: ${appCertificate}, channelName: ${channelName}, staticUid: ${staticUid}, rtcRole: ${rtcRole}, tokenExpiration: ${tokenExpiration}, previlegeExpireTime: ${previlegeExpireTime}`)
   
     try {
 
@@ -872,7 +871,7 @@ const getRtcToken = async (req: ExtendedRequest, res: Response, next: NextFuncti
 
             console.log("inside if rtc not present in user object")
 
-            console.log(`appId: ${appId}, appCertificate: ${appCertificate}, channelName: ${channelName}, uid: ${uid}, rtcRole: ${rtcRole}, tokenExpiration: ${tokenExpiration}`)
+            console.log(`appId: ${appId}, appCertificate: ${appCertificate}, channelName: ${channelName}, staticUid: ${staticUid}, rtcRole: ${rtcRole}, tokenExpiration: ${tokenExpiration}`)
 
             const token = RtcTokenBuilder.buildTokenWithUid(
                 appId,
