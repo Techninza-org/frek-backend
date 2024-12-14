@@ -902,7 +902,7 @@ const getRtcToken = async (req: ExtendedRequest, res: Response, next: NextFuncti
             //getting index of the channelName in the array
             let index = user.rtcToken.findIndex((x: any) => x.channelName === channelName);
             
-            if (user.rtcToken[index].createdAt + ( 3600 ) < Date.now()) { // if token is older than 24 hours 
+            if (user.rtcToken[index].createdAt + ( 3600 * 24 ) < Date.now()) { // if token is older than 24 hours 
 
                 console.log("inside if rtc is present in user object and is older than 24 hours")
 
