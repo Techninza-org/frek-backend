@@ -842,29 +842,29 @@ const getRtcToken = async (req: ExtendedRequest, res: Response, next: NextFuncti
         if(!user) { return res.status(400).send({message: 'User not found'}) };
 
         // if (!user.rtcToken) {
-        console.log("user rtc token: ", user.rtcToken)
+        // console.log("user rtc token: ", user.rtcToken)
 
-        let rtcTokenByChannelName = 'notFoundToken';
+        // let rtcTokenByChannelName = 'notFoundToken';
 
-        const isRtcTokenAvailableByChannelNameOverAllUsers = await User.findOne({
-            rtcToken: {
-                $elemMatch: {channelName: channelName}
-            }
-        })
+        // const isRtcTokenAvailableByChannelNameOverAllUsers = await User.findOne({
+        //     rtcToken: {
+        //         $elemMatch: {channelName: channelName}
+        //     }
+        // })
 
-        if (isRtcTokenAvailableByChannelNameOverAllUsers){
+        // if (isRtcTokenAvailableByChannelNameOverAllUsers){
 
-            console.log("inside if rtc token is available in all-users-object")
+        //     console.log("inside if rtc token is available in all-users-object")
 
-            for (let i = 0 ; i < isRtcTokenAvailableByChannelNameOverAllUsers.rtcToken.length; i++ ){
-                if (isRtcTokenAvailableByChannelNameOverAllUsers.rtcToken[i].channelName === channelName){
-                    rtcTokenByChannelName = isRtcTokenAvailableByChannelNameOverAllUsers.rtcToken[i].token;
-                    break;
-                }
-            }
+        //     for (let i = 0 ; i < isRtcTokenAvailableByChannelNameOverAllUsers.rtcToken.length; i++ ){
+        //         if (isRtcTokenAvailableByChannelNameOverAllUsers.rtcToken[i].channelName === channelName){
+        //             rtcTokenByChannelName = isRtcTokenAvailableByChannelNameOverAllUsers.rtcToken[i].token;
+        //             break;
+        //         }
+        //     }
 
-            return res.status(200).json({ token: rtcTokenByChannelName });
-        }
+        //     // return res.status(200).json({ token: rtcTokenByChannelName });
+        // }
 
         const isRtcTokenPresent = user.rtcToken.find((x: any) => x.channelName === channelName);
         if (!isRtcTokenPresent) { // 
