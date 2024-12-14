@@ -820,8 +820,6 @@ const getRtcToken = async (req: ExtendedRequest, res: Response, next: NextFuncti
     const pubDataStreamPrivilegeExpireInSeconds = 3600
     //============
   
-    // Validate input
-    // if (!channelName || uid == null) {return res.status(400).json({ error: "channelName and uid are required" });}
     if (!channelName) {return res.status(400).json({ error: "channelName is required" });}
   
     const appId = process.env.AGORA_APP_ID || '0ad2acf092ca4c088f5f00e41e170286';
@@ -831,8 +829,6 @@ const getRtcToken = async (req: ExtendedRequest, res: Response, next: NextFuncti
       return res.status(500).json({ error: "AGORA_APP_ID or AGORA_APP_CERTIFICATE not set in environment variables" });
     }
   
-    // Set role
-    // const rtcRole = role === "SUBSCRIBER" ? RtcRole.SUBSCRIBER : RtcRole.PUBLISHER;
     const rtcRole = role === "SUBSCRIBER" ? Role.SUBSCRIBER : Role.PUBLISHER;
 
     console.log(`appId: ${appId}, appCertificate: ${appCertificate}, channelName: ${channelName}, staticUid: ${staticUid}, rtcRole: ${rtcRole}, tokenExpiration: ${tokenExpiration}, previlegeExpireTime: ${previlegeExpireTime}`)
@@ -841,32 +837,63 @@ const getRtcToken = async (req: ExtendedRequest, res: Response, next: NextFuncti
 
         if(!user) { return res.status(400).send({message: 'User not found'}) };
 
-        // if (!user.rtcToken) {
-        // console.log("user rtc token: ", user.rtcToken)
+        console.log("user rtc token: ", user.rtcToken)
 
-        // let rtcTokenByChannelName = 'notFoundToken';
+        let rtcTokenByChannelName = 'notFoundToken';
 
-        // const isRtcTokenAvailableByChannelNameOverAllUsers = await User.findOne({
-        //     rtcToken: {
-        //         $elemMatch: {channelName: channelName}
-        //     }
-        // })
+        const isRtcTokenAvailableByChannelNameOverAllUsers = await User.findOne({
+            rtcToken: {
+                $elemMatch: {channelName: channelName}
+            }
+        })
 
-        // if (isRtcTokenAvailableByChannelNameOverAllUsers){
+        if (isRtcTokenAvailableByChannelNameOverAllUsers){
 
-        //     console.log("inside if rtc token is available in all-users-object")
+            console.log("inside if rtc token is available in all-users-object")
 
-        //     for (let i = 0 ; i < isRtcTokenAvailableByChannelNameOverAllUsers.rtcToken.length; i++ ){
-        //         if (isRtcTokenAvailableByChannelNameOverAllUsers.rtcToken[i].channelName === channelName){
-        //             rtcTokenByChannelName = isRtcTokenAvailableByChannelNameOverAllUsers.rtcToken[i].token;
-        //             break;
-        //         }
-        //     }
+            for (let i = 0 ; i < isRtcTokenAvailableByChannelNameOverAllUsers.rtcToken.length; i++ ){
+                if (isRtcTokenAvailableByChannelNameOverAllUsers.rtcToken[i].channelName === channelName){
+                    rtcTokenByChannelName = isRtcTokenAvailableByChannelNameOverAllUsers.rtcToken[i].token;
 
-        //     // return res.status(200).json({ token: rtcTokenByChannelName });
-        // }
+                    console.log(`createdAt: ${isRtcTokenAvailableByChannelNameOverAllUsers.rtcToken[i].tokenCreatedAt}, current date: ${Date.now()}`)
+
+                    const isOlderThan24Hours = isRtcTokenAvailableByChannelNameOverAllUsers.rtcToken[i].tokenCreatedAt < Date.now() - ( 24 * 60 * 60 * 1000 );
+                    console.log(`isOlderThan24Hours: ${isOlderThan24Hours}`)
+
+                    // const twenyFourHoursLaterDateOfRtcToken = isRtcTokenAvailableByChannelNameOverAllUsers.rtcToken[i].tokenCreatedAt + ( 24 * 60 * 60 * 1000 );
+                    // console.log(`twenyFourHoursLaterDateOfRtcToken: ${twenyFourHoursLaterDateOfRtcToken}, currentDate: ${Date.now()}, createdDate: ${isRtcTokenAvailableByChannelNameOverAllUsers.rtcToken[i].tokenCreatedAt}`)
+
+                    if (isOlderThan24Hours) { // if token is older than 24 hours
+                        console.log("inside if rtc token is available in all-users-object and is older than 24 hours")
+                        
+                        const token = RtcTokenBuilder.buildTokenWithUid(
+                            appId,
+                            appCertificate,
+                            channelName,
+                            staticUid,
+                            rtcRole,
+                            tokenExpiration * 24,
+                            privilegeExpirationInSecond * 24 // addedLater
+                        );
+
+                        isRtcTokenAvailableByChannelNameOverAllUsers.rtcToken[i].tokenCreatedAt = Date.now();
+                        isRtcTokenAvailableByChannelNameOverAllUsers.rtcToken[i].token = token;
+                        await isRtcTokenAvailableByChannelNameOverAllUsers.save();
+
+                        rtcTokenByChannelName = token;
+
+                        break;
+                    }
+
+                    break;
+                }
+            }
+
+            return res.status(200).json({ token: rtcTokenByChannelName });
+        }
 
         const isRtcTokenPresent = user.rtcToken.find((x: any) => x.channelName === channelName);
+
         if (!isRtcTokenPresent) { // 
 
             console.log("inside if rtc not present in user object")
@@ -886,7 +913,6 @@ const getRtcToken = async (req: ExtendedRequest, res: Response, next: NextFuncti
                 privilegeExpirationInSecond * 24 // addedLater
             );
 
-            // user.rtcToken = { token: token, channelName: channelName };
             user.rtcToken.push({ token: token, channelName: channelName });
 
             await user.save();
@@ -894,53 +920,44 @@ const getRtcToken = async (req: ExtendedRequest, res: Response, next: NextFuncti
             return res.json({ token: token });
         }
 
-        // if (user.rtcToken) {
-        if (isRtcTokenPresent) {
+        // if (isRtcTokenPresent) {
 
-            console.log("inside if rtc is present in user object")
+        //     console.log("inside if rtc is present in user object")
 
-            //getting index of the channelName in the array
-            let index = user.rtcToken.findIndex((x: any) => x.channelName === channelName);
+        //     //getting index of the channelName in the array
+        //     let index = user.rtcToken.findIndex((x: any) => x.channelName === channelName);
+
+        //     const twenyFourHoursLaterDateOfRtcToken = user.rtcToken[index].createdAt + ( 24 * 60 * 60 * 1000 ); // 3 hours
+        //     const currentDate = Date.now();
+
+        //     console.log(`twenyFourHoursLaterDateOfRtcToken: ${twenyFourHoursLaterDateOfRtcToken}, currentDate: ${currentDate}, createdDate: ${user.rtcToken[index].createdAt}`)
             
-            if (user.rtcToken[index].createdAt + ( 3600 * 24 ) < Date.now()) { // if token is older than 24 hours 
+        //     // if (user.rtcToken[index].createdAt + ( 3 ) < Date.now()) { // if token is older than 24 hours 
+        //     if (twenyFourHoursLaterDateOfRtcToken < Date.now()) { // if token is older than 24 hours 
 
-                console.log("inside if rtc is present in user object and is older than 24 hours")
+        //         console.log("inside if rtc is present in user object and is older than 24 hours")
 
-                // const token = RtcTokenBuilder.buildTokenWithUid(
-                //     appId,
-                //     appCertificate,
-                //     channelName,
-                //     uid,
-                //     rtcRole,
-                //     tokenExpiration
-                // );
+        //         const token = RtcTokenBuilder.buildTokenWithUid(
+        //             appId,
+        //             appCertificate,
+        //             channelName,
+        //             staticUid,
+        //             rtcRole,
+        //             tokenExpiration * 24,
+        //             privilegeExpirationInSecond * 24 // addedLater
+        //         );
 
-                const token = RtcTokenBuilder.buildTokenWithUid(
-                    appId,
-                    appCertificate,
-                    channelName,
-                    // channelName1,
-                    // uid,
-                    staticUid,
-                    rtcRole,
-                    // role1,
-                    tokenExpiration * 24,
-                    privilegeExpirationInSecond * 24 // addedLater
-                );
-                
-                // user.rtcToken = {token: token, channelName: channelName};
-                // user.rtcToken[index] = {token: token, channelName: channelName};
-                user.rtcToken[index].createdAt = Date.now();
-                user.rtcToken[index].token = token;
-                await user.save();
+        //         user.rtcToken[index].createdAt = Date.now();
+        //         user.rtcToken[index].token = token;
+        //         await user.save();
 
-                return res.json({ token: token });
-            } else {
+        //         return res.json({ token: token });
+        //     } else {
 
-                console.log("inside if rtc is present in user object and is -not- older than 24 hours")
-                return res.status(200).json({ token: user.rtcToken[index].token });
-            }
-        }
+        //         console.log("inside if rtc is present in user object and is -not- older than 24 hours")
+        //         return res.status(200).json({ token: user.rtcToken[index].token });
+        //     }
+        // }
     } catch (err) {
       console.error("Error generating token:", err);
       return res.status(500).json({ error: "Failed to generate token" });
