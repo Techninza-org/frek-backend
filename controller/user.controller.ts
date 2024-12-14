@@ -10,10 +10,12 @@ import mongoose from "mongoose"
 import { Reported } from "../models/reported"
 import { Transaction } from "../models/transaction"
 
-import { RtcTokenBuilder, RtcRole, RtmTokenBuilder } from "agora-access-token";
+// import { RtcTokenBuilder, RtcRole, RtmTokenBuilder } from "agora-access-token";
 import { StreamGroup } from "../models/streamGroup"
 import { DatabaseConstant } from "../models/databaseConstant"
 import { Package } from "../models/packages"
+
+import { RtcTokenBuilder, Role } from "../utils/RtcTokenBuilder2"
 
 const getUserDetails = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     //update last seen 
@@ -804,23 +806,37 @@ const getRtcToken = async (req: ExtendedRequest, res: Response, next: NextFuncti
     const { channelName, uid, role = "PUBLISHER", tokenExpiration = 3600 } = req.body;
     const user = req.user;
     const previlegeExpireTime = 3600;
+
+    //============
+    const channelName1 = '7d72365eb983485397e3e3f9d460bdda'
+    const staticUid = 0
+    const account = '2882341273'
+    const role1 = Role.PUBLISHER
+    const tokenExpirationInSecond = 3600
+    const privilegeExpirationInSecond = 3600
+    const joinChannelPrivilegeExpireInSeconds = 3600
+    const pubAudioPrivilegeExpireInSeconds = 3600
+    const pubVideoPrivilegeExpireInSeconds = 3600
+    const pubDataStreamPrivilegeExpireInSeconds = 3600
+    //============
   
     // Validate input
     if (!channelName || uid == null) {
       return res.status(400).json({ error: "channelName and uid are required" });
     }
   
-    // const appId = process.env.AGORA_APP_ID || '0ad2acf092ca4c088f5f00e41e170286';
-    const appId = '0ad2acf092ca4c088f5f00e41e170286';
-    // const appCertificate = process.env.AGORA_APP_CERTIFICATE || 'c8300f5918aa498b90cbd74c880022c0';
-    const appCertificate = 'c8300f5918aa498b90cbd74c880022c0';
+    const appId = process.env.AGORA_APP_ID || '0ad2acf092ca4c088f5f00e41e170286';
+    const appCertificate = process.env.AGORA_APP_CERTIFICATE || 'c8300f5918aa498b90cbd74c880022c0';
   
     if (!appId || !appCertificate) {
       return res.status(500).json({ error: "AGORA_APP_ID or AGORA_APP_CERTIFICATE not set in environment variables" });
     }
   
     // Set role
-    const rtcRole = role === "SUBSCRIBER" ? RtcRole.SUBSCRIBER : RtcRole.PUBLISHER;
+    // const rtcRole = role === "SUBSCRIBER" ? RtcRole.SUBSCRIBER : RtcRole.PUBLISHER;
+    const rtcRole = role === "SUBSCRIBER" ? Role.SUBSCRIBER : Role.PUBLISHER;
+
+    console.log(`appId: ${appId}, appCertificate: ${appCertificate}, channelName: ${channelName}, uid: ${uid}, rtcRole: ${rtcRole}, tokenExpiration: ${tokenExpiration}, previlegeExpireTime: ${previlegeExpireTime}`)
   
     try {
 
@@ -862,9 +878,13 @@ const getRtcToken = async (req: ExtendedRequest, res: Response, next: NextFuncti
                 appId,
                 appCertificate,
                 channelName,
-                uid,
+                // channelName1,
+                // uid,
+                staticUid,
                 rtcRole,
-                tokenExpiration
+                // role1,
+                tokenExpiration,
+                privilegeExpirationInSecond // addedLater
             );
 
             // user.rtcToken = { token: token, channelName: channelName };
@@ -887,13 +907,26 @@ const getRtcToken = async (req: ExtendedRequest, res: Response, next: NextFuncti
 
                 console.log("inside if rtc is present in user object and is older than 24 hours")
 
+                // const token = RtcTokenBuilder.buildTokenWithUid(
+                //     appId,
+                //     appCertificate,
+                //     channelName,
+                //     uid,
+                //     rtcRole,
+                //     tokenExpiration
+                // );
+
                 const token = RtcTokenBuilder.buildTokenWithUid(
                     appId,
                     appCertificate,
                     channelName,
-                    uid,
+                    // channelName1,
+                    // uid,
+                    staticUid,
                     rtcRole,
-                    tokenExpiration
+                    // role1,
+                    tokenExpiration,
+                    privilegeExpirationInSecond // addedLater
                 );
                 
                 // user.rtcToken = {token: token, channelName: channelName};
