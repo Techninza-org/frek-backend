@@ -7,6 +7,7 @@ import { ExtendedRequest } from '../utils/middleware'
 import { getUserToken, sendNotif, sendNotification } from '../app'
 import { Otp } from '../models/otp'
 import { sendTwilioOtp } from '../utils/twilioSms'
+import { generateRandomUsername } from '../utils/help'
 
 const signUp = async (req: Request, res: Response, next: NextFunction) => {
     const isValidPayload = helper.isValidatePaylod(req.body, ['name', 'email', 'password', 'gender', 'dob', 'username'])
@@ -144,10 +145,12 @@ const socialLogin = async (req: Request, res: Response, next: NextFunction) => {
     try{
         const user = await User.findOne({email, type})
         if(!user){
+            const randomUsername = await generateRandomUsername(name);
             const newUser = await User.create({
-                name,
-                email,
-                type
+                username: randomUsername,
+                name: name,
+                email: email,
+                type: type,
             })
             const token = jwt.sign({email: newUser.email}, process.env.JWT_SECRET!, {
                 expiresIn: '7d'
