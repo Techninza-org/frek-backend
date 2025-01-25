@@ -257,8 +257,11 @@ io.on('connection', (socket) => {
                 //======== logic for group chat start here =========
 
         // Remove the user from the 'users' Map
+        console.log("groupUsers.size outside: ", groupUsers.size);
 
         if (groupUsers.size > 0){
+
+            console.log("groupUsers.size inside: ", groupUsers.size);
 
             groupUsers.forEach( async (value, key) => {
                 if (value.socketId === socket.id) {
@@ -277,6 +280,13 @@ io.on('connection', (socket) => {
                     //==== remove user from streamGroup connectedUsers array ====
                     const userId = key;
                     const groups = await StreamGroup.find({ isLive: true, connectedUsers: { $in: userId }}).select('connectedUsers'); // get all groups where connectedUsers array contains userId
+                    const hostedGroups = await StreamGroup.find({ isLive: true, hostUserId: userId }).select('hostUserId'); // get all groups where hostUserId is userId
+
+                    //make all groups where user is host, isLive = false
+                    for (const group of hostedGroups){
+                        group.isLive = false;
+                        await group.save();
+                    }
 
                     console.log("userId: ", userId);
                     console.log("groups: ", groups);
