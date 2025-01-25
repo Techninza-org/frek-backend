@@ -995,8 +995,8 @@ const getLikedUsersStreamGroups = async (req: ExtendedRequest, res: Response, ne
 
 
         // get all live streamGroups of liked users
-        // const streamGroups = await StreamGroup.find({ hostUserId: { $in: likedUsersIdsArray }, isLive: true });
-        const streamGroups = await StreamGroup.find({ hostUserId: { $in: mergedArray }, isLive: true });
+        const streamGroups = await StreamGroup.find({ hostUserId: { $in: likedUsersIdsArray }, isLive: true });
+        // const streamGroups = await StreamGroup.find({ isLive: true, hostUserId: { $in: mergedArray } });
 
         return res.status(200).json({ status: 200, streamGroups: streamGroups });
     } catch (error) {
