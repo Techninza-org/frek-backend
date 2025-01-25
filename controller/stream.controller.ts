@@ -155,6 +155,8 @@ const getAllStreamGroups = async (req: Request, res: Response, next: NextFunctio
         // exclute where connectedUserCount is 0
         allStreamGroupWithConnectedUserCount = allStreamGroupWithConnectedUserCount.filter((streamGroup) => streamGroup.connectedUserCount > 0);
 
+        console.log("allStreamGroupWithConnectedUserCount after filter: ", allStreamGroupWithConnectedUserCount.length);
+
         return res.status(200).send({ message: "fetched succussfully", allGroups: allStreamGroupWithConnectedUserCount, status: 200 });
     } catch (error) {
         console.log("error in getAllAgoraStreams", error)
