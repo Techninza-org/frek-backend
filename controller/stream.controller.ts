@@ -140,7 +140,7 @@ const getAllStreamGroups = async (req: Request, res: Response, next: NextFunctio
         
         const allStreamGroups = await StreamGroup.find({isLive: true}).populate({path: 'hostUserId', select: 'name email gender dob age'}).populate('coHostUserIds').populate({ path: 'connectedUsers', select: 'name username avatar gender email'}).populate('bouncerUserIds').populate('streamRequestUserIds');
 
-        const allStreamGroupWithConnectedUserCount = allStreamGroups.map((streamGroup) => {
+        let allStreamGroupWithConnectedUserCount = allStreamGroups.map((streamGroup) => {
             return {
                 ...streamGroup._doc,
                 connectedUserCount: streamGroup.connectedUsers.length
@@ -151,6 +151,9 @@ const getAllStreamGroups = async (req: Request, res: Response, next: NextFunctio
 
         //sort allStreamGroupWithConnectedUserCount by connectedUserCount in descending order
         allStreamGroupWithConnectedUserCount.sort((a, b) => b.connectedUserCount - a.connectedUserCount);
+
+        // exclute where connectedUserCount is 0
+        allStreamGroupWithConnectedUserCount = allStreamGroupWithConnectedUserCount.filter((streamGroup) => streamGroup.connectedUserCount > 0);
 
         return res.status(200).send({ message: "fetched succussfully", allGroups: allStreamGroupWithConnectedUserCount, status: 200 });
     } catch (error) {
