@@ -286,7 +286,8 @@ io.on('connection', (socket) => {
                             group.connectedUsers.pull(userId);
                             await group.save();
 
-                            if (group.hostUserId == userId){
+                            // if (group.hostUserId == userId){
+                            if (group.hostUserId.equals(userId)){
                                 group.isLive = false;
                                 await group.save();
                             }

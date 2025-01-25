@@ -147,6 +147,8 @@ const getAllStreamGroups = async (req: Request, res: Response, next: NextFunctio
             }
         });
 
+        console.log("allStreamGroupWithConnectedUserCount: ", allStreamGroupWithConnectedUserCount.length);
+
         //sort allStreamGroupWithConnectedUserCount by connectedUserCount in descending order
         allStreamGroupWithConnectedUserCount.sort((a, b) => b.connectedUserCount - a.connectedUserCount);
 
