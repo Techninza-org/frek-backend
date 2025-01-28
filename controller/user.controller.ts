@@ -524,7 +524,16 @@ const getSuperlikeOffers = async (
 const updatePreferences = async (req: ExtendedRequest, res: Response, next: NextFunction) => {
     try {
         const user = req.user;
-        const { minAge, maxAge, gender, area } = req.body;
+        // const { minAge, maxAge, gender, area } = req.body;
+        let { minAge, maxAge, gender, area } = req.body;
+
+        if (area >= 100){
+            area = 6371
+        }
+
+        if (maxAge >= 40){
+            maxAge = 100
+        }
 
         user.preferences = [{
             minAge: minAge || user.preferences[0].minAge,
