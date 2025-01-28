@@ -183,7 +183,11 @@ const getFeed = async (req: ExtendedRequest, res: Response, next: NextFunction) 
         
         const userPreferences = user.preferences[0] ? user.preferences[0] : false;
 
-        const users = await User.find({ _id: { $nin: userIdToExclude }, age: {$gt: userPreferences.minAge || 18, $lt: userPreferences.maxAge || 40 }, gender: (userPreferences.gender).toLowerCase() || 'male' });
+        //excluding liked, matched, disliked and blocked users
+        // const users = await User.find({ _id: { $nin: userIdToExclude }, age: {$gt: userPreferences.minAge || 18, $lt: userPreferences.maxAge || 40 }, gender: (userPreferences.gender).toLowerCase() || 'male' });
+
+        //not excluding liked, matched, disliked and blocked users
+        const users = await User.find({ age: {$gt: userPreferences.minAge || 18, $lt: userPreferences.maxAge || 100 }, gender: (userPreferences.gender).toLowerCase() || 'male' });
 
         console.log("userPreferences: ", userPreferences);
 
