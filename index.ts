@@ -24,21 +24,21 @@ const imageStorage = multer.diskStorage({
 export const upload = multer({ storage: imageStorage })
 
 const PORT = process.env.PORT || 3000;
-const HTTP_PORT = process.env.HTTP_PORT || 80;
+// const HTTP_PORT = process.env.HTTP_PORT || 80;
 
-// const HTTP_PORT = process.env.HTTP_PORT || 3000;  //vivek
+const HTTP_PORT = process.env.HTTP_PORT || 3000;  //vivek
 
 // const HOST = '0.0.0.0';
 
 import('./app')
     .then((server) => {
-        const httpsServer = server.httpsServer; 
-        const httpServer = server.httpServer; 
-        httpsServer.listen(PORT, () => {
-            console.log(`HTTPS Server running on port ${PORT}`);
-        });
+        // const httpsServer = server.httpsServer; 
+        // const httpServer = server.httpServer; 
+        // httpsServer.listen(PORT, () => {
+        //     console.log(`HTTPS Server running on port ${PORT}`);
+        // });
 
-        // const httpServer = server.httpServerViv; //vivek 
+        const httpServer = server.httpServerViv; //vivek 
 
         httpServer.listen(HTTP_PORT, () => {
             console.log(`HTTP Server running on port ${HTTP_PORT} and redirecting to HTTPS`);
