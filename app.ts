@@ -781,7 +781,7 @@ const groupUsers = new Map()
 // })
 
 io.on('connection', (socket) => {
-    console.log('user connected', socket.id);
+    console.log('user connected::::::::::::::::::::::::::::', socket.id);
     const userId = socket.handshake.query.userId
     if (typeof userId === 'string') {
         userSocketMap[userId] = socket.id;
@@ -790,7 +790,7 @@ io.on('connection', (socket) => {
     io.emit('getOnlineUsers', Object.keys(userSocketMap))
 
     socket.on('disconnect', async () => {
-        console.log('user disconnected', socket.id);
+        console.log('user disconnected:::::::::::::::::::::', socket.id);
         for(const key in userSocketMap){
             if(userSocketMap[key] === socket.id){
                 delete userSocketMap[key]
