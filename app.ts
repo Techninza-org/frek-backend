@@ -72,22 +72,22 @@
 
 // app.post("/generate-rtc-token", (req, res) => {
 //     const { channelName, uid, role = "PUBLISHER", tokenExpiration = 3600} = req.body;
-  
+
 //     // Validate input
 //     if (!channelName || uid == null) {
 //       return res.status(400).json({ error: "channelName and uid are required" });
 //     }
-  
+
 //     const appId = process.env.AGORA_APP_ID;
 //     const appCertificate = process.env.AGORA_APP_CERTIFICATE;
-  
+
 //     if (!appId || !appCertificate) {
 //       return res.status(500).json({ error: "AGORA_APP_ID or AGORA_APP_CERTIFICATE not set in environment variables" });
 //     }
-  
+
 //     // Set role
 //     const rtcRole = role === "SUBSCRIBER" ? RtcRole.SUBSCRIBER : RtcRole.PUBLISHER;
-  
+
 //     try {
 //         const token = RtcTokenBuilder.buildTokenWithUid(
 //             appId,
@@ -109,23 +109,23 @@
 //     const salt = Math.floor(Math.random() * 100000); // Generate a random salt
 //     const expirationTimeInSeconds = 86400; // Validity of the token (1 hour)
 //     const privilegeExpiredTs = Math.floor(Date.now() / 1000) + expirationTimeInSeconds;
-  
+
 //     // Validate the request
 //     if (!userAccount) {
 //       return res.status(400).json({ error: "userAccount is required" });
 //     }
-  
+
 //     const appId = process.env.AGORA_APP_ID;
 //     const appCertificate = process.env.AGORA_APP_CERTIFICATE;
-  
+
 //     if (!appId || !appCertificate) {
 //       return res.status(500).json({ error: "AGORA_APP_ID or AGORA_APP_CERTIFICATE not set in environment variables" });
 //     }
-  
+
 //     try {
 //       // Generate the RTM token
 //       const token = RtmTokenBuilder.buildToken(appId, appCertificate, userAccount, salt, privilegeExpiredTs);
-      
+
 //       return res.json({ token });
 //     } catch (err) {
 //       console.error("Error generating RTM token:", err);
@@ -196,7 +196,7 @@
 //     console.log('User registration token:', user.registrationToken);
 //     if(!user) return null
 //     if(!user.registrationToken) return null
-    
+
 //     return user.registrationToken 
 // }
 
@@ -303,14 +303,14 @@
 //                         // }
 //                     }
 //                     //================================================================
-                    
+
 //                 }
 //             });
 
 //             //print all users in the group
 //             console.log(`Users in group (at time of disconnect, after leaving) : ${groupUsers.size}`);
 //         }
-        
+
 //         //======== logic for group chat ends here =========
 
 
@@ -393,7 +393,7 @@
 
 //             //print all users in the group
 //             console.log(`Users in group (at time of leave, after leaving) ${groupId}: ${groupUsers.size}`);
-            
+
 //         } else {
 //             console.log(`User ${userId} not found in group ${groupId} | inside leaveGroup`);
 //         }
@@ -403,13 +403,13 @@
 //     socket.on('groupUsersCount', ({groupId}) => {
 //         const groupUsersCount = io.sockets.adapter.rooms.get(groupId)?.size || 0;
 //         console.log(`Group ${groupId} has ${groupUsersCount} users`);
-        
+
 //         socket.emit('recieveGroupUsersCount', { groupUsersCount: groupUsersCount });
 //     });
 
 //     //============= Group Chat End =============
 // })
-    
+
 // const httpApp = express();
 // httpApp.use((req, res) => {
 //   res.redirect(`https://${req.headers.host}${req.url}`);
@@ -457,7 +457,20 @@ const app = express()
 
 app.use(cors())
 app.use(express.json())
-app.use('/public', express.static(path.join(__dirname, 'public')));
+// app.use('/public', express.static(path.join(__dirname, 'public')));
+
+app.get('/api/public/*', (req, res) => {
+    const relativePath = req.path.replace('/api/public/', ''); // Extract dynamic path
+    const filePath = path.join(__dirname, 'public', relativePath);
+
+    if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ message: 'File not found' });
+    }
+    res.sendFile(filePath);
+});
+
+
+
 
 
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT!)
@@ -481,15 +494,15 @@ export const getReceiverSocketId = (receiverId: string) => {
 
 const userSocketMap: { [key: string]: string } = {};
 
-app.get('/ping', (req, res) => {
-    return res.status(200).send({message: 'pong'})
+app.get('/api/ping', (req, res) => {
+    return res.status(200).send({ message: 'pong' })
 })
 
-app.post('/create-payment-intent', async (req, res) => {
+app.post('/api/create-payment-intent', async (req, res) => {
     const { amount, currency } = req.body;
     try {
         const paymentIntent = await stripe.paymentIntents.create({
-            amount, 
+            amount,
             currency,
         });
 
@@ -560,10 +573,10 @@ export const getUserToken = async (userId: any) => {
     console.log('Getting user token:', userId);
     const user = await User.findById(userId).select('registrationToken');
     console.log('User registration token:', user.registrationToken);
-    if(!user) return null
-    if(!user.registrationToken) return null
-    
-    return user.registrationToken 
+    if (!user) return null
+    if (!user.registrationToken) return null
+
+    return user.registrationToken
 }
 
 mongoose.connect(process.env.MONGO_URI!)
@@ -571,7 +584,7 @@ mongoose.connect(process.env.MONGO_URI!)
     .catch((err) => {
         console.log(err);
     })
-    
+
 // const privateKey = fs.readFileSync('/etc/letsencrypt/live/thefrekapp.com/privkey.pem', 'utf8');
 // const certificate = fs.readFileSync('/etc/letsencrypt/live/thefrekapp.com/cert.pem', 'utf8');
 // const ca = fs.readFileSync('/etc/letsencrypt/live/thefrekapp.com/chain.pem', 'utf8');
@@ -606,19 +619,19 @@ io.on('connection', (socket) => {
 
     socket.on('disconnect', async () => {
         console.log('user disconnected', socket.id);
-        for(const key in userSocketMap){
-            if(userSocketMap[key] === socket.id){
+        for (const key in userSocketMap) {
+            if (userSocketMap[key] === socket.id) {
                 delete userSocketMap[key]
             }
         }
 
-                //======== logic for group chat start here =========
+        //======== logic for group chat start here =========
 
         // Remove the user from the 'users' Map
 
-        if (groupUsers.size > 0){
+        if (groupUsers.size > 0) {
 
-            groupUsers.forEach( async (value, key) => {
+            groupUsers.forEach(async (value, key) => {
                 if (value.socketId === socket.id) {
                     groupUsers.delete(key);
                     console.log(`User ${key} removed from groupUsers | (at the time of disconnect)`);
@@ -634,31 +647,31 @@ io.on('connection', (socket) => {
 
                     //==== remove user from streamGroup connectedUsers array ====
                     const userId = key;
-                    const groups = await StreamGroup.find({ isLive: true, connectedUsers: { $in: userId }}).select('connectedUsers'); // get all groups where connectedUsers array contains userId
+                    const groups = await StreamGroup.find({ isLive: true, connectedUsers: { $in: userId } }).select('connectedUsers'); // get all groups where connectedUsers array contains userId
 
                     console.log("userId: ", userId);
                     console.log("groups: ", groups);
 
-                    for (const group of groups){
+                    for (const group of groups) {
                         // if (group.connectedUsers.includes(userId)){
-                            group.connectedUsers.pull(userId);
-                            await group.save();
+                        group.connectedUsers.pull(userId);
+                        await group.save();
 
-                            if (group.hostUserId == userId){
-                                group.isLive = false;
-                                await group.save();
-                            }
+                        if (group.hostUserId == userId) {
+                            group.isLive = false;
+                            await group.save();
+                        }
                         // }
                     }
                     //================================================================
-                    
+
                 }
             });
 
             //print all users in the group
             console.log(`Users in group (at time of disconnect, after leaving) : ${groupUsers.size}`);
         }
-        
+
         //======== logic for group chat ends here =========
 
 
@@ -675,7 +688,7 @@ io.on('connection', (socket) => {
         socket.join(groupId)
 
         const isValidStreamGroupId = mongoose.Types.ObjectId.isValid(groupId);
-        const streamGroup = isValidStreamGroupId ? await StreamGroup.findOne({_id: groupId}) : false;
+        const streamGroup = isValidStreamGroupId ? await StreamGroup.findOne({ _id: groupId }) : false;
 
         // if streamGroup is not found, stop execution
         // if (!streamGroup) {
@@ -692,9 +705,9 @@ io.on('connection', (socket) => {
             // }
 
             const isValidUser = mongoose.Types.ObjectId.isValid(userId);
-            const user = isValidUser ? await User.findOne({_id: userId}) : false;
+            const user = isValidUser ? await User.findOne({ _id: userId }) : false;
 
-            if (user){
+            if (user) {
                 streamGroup.connectedUsers.push(user._id);
                 await streamGroup.save();
             }
@@ -737,14 +750,14 @@ io.on('connection', (socket) => {
             groupUsers.delete(userId);
 
             const isValidStreamGroupId = mongoose.Types.ObjectId.isValid(groupId);
-            const streamGroup = isValidStreamGroupId ? await StreamGroup.findOne({_id: groupId}) : false;
+            const streamGroup = isValidStreamGroupId ? await StreamGroup.findOne({ _id: groupId }) : false;
 
             if (streamGroup) {
-                if (streamGroup.connectedUsers.includes(userId)){
+                if (streamGroup.connectedUsers.includes(userId)) {
                     streamGroup.connectedUsers.pull(userId);
                     await streamGroup.save();
 
-                    if (streamGroup.hostUserId == userId){
+                    if (streamGroup.hostUserId == userId) {
                         streamGroup.isLive = false;
                         await streamGroup.save();
                     }
@@ -761,19 +774,19 @@ io.on('connection', (socket) => {
     });
 
     // Event: Get the number of users in a group
-    socket.on('groupUsersCount', ({groupId}) => {
+    socket.on('groupUsersCount', ({ groupId }) => {
         const groupUsersCount = io.sockets.adapter.rooms.get(groupId)?.size || 0;
         console.log(`Group ${groupId} has ${groupUsersCount} users`);
-        
+
         socket.emit('recieveGroupUsersCount', { groupUsersCount: groupUsersCount });
     });
 
     //============= Group Chat End =============
 })
-    
+
 const httpApp = express();
 httpApp.use((req, res) => {
-  res.redirect(`https://${req.headers.host}${req.url}`);
+    res.redirect(`https://${req.headers.host}${req.url}`);
 });
 // const httpServer = http.createServer(httpApp);
 
