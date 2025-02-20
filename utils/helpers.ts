@@ -46,7 +46,7 @@ const sendMail = (to: string, subject: string, body: string) => {
 }
 
 const imageUrlGen = (filePath: any) => {
-        const gen_url = "https://thefrekapp.com/public/images/" + filePath.filename; 
+        const gen_url = "https://thefrekapp.com/api/public/images/" + filePath.filename; 
         return gen_url
 }
 const helper = { isValidatePaylod, isValidDateFormat, imageUrlGen, sendMail }  
