@@ -588,7 +588,7 @@ const io = new Server(httpServerViv, {
         origin: '*',
         methods: ['GET', 'POST']
     },
-    path: '/api/socket.io'
+    path: '/api'
 });
 
 const groupUsers = new Map()
