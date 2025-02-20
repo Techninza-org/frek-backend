@@ -469,10 +469,6 @@ app.get('/api/public/*', (req, res) => {
     res.sendFile(filePath);
 });
 
-
-
-
-
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT!)
 
 try {
@@ -608,6 +604,182 @@ const io = new Server(httpServerViv, {
 
 const groupUsers = new Map()
 
+// io.on('connection', (socket) => {
+//     console.log('user connected', socket.id);
+//     const userId = socket.handshake.query.userId
+//     if (typeof userId === 'string') {
+//         userSocketMap[userId] = socket.id;
+//     }
+
+//     io.emit('getOnlineUsers', Object.keys(userSocketMap))
+
+//     socket.on('disconnect', async () => {
+//         console.log('user disconnected', socket.id);
+//         for (const key in userSocketMap) {
+//             if (userSocketMap[key] === socket.id) {
+//                 delete userSocketMap[key]
+//             }
+//         }
+
+//         //======== logic for group chat start here =========
+
+//         // Remove the user from the 'users' Map
+
+//         if (groupUsers.size > 0) {
+
+//             groupUsers.forEach(async (value, key) => {
+//                 if (value.socketId === socket.id) {
+//                     groupUsers.delete(key);
+//                     console.log(`User ${key} removed from groupUsers | (at the time of disconnect)`);
+
+//                     // Remove the user from the group
+//                     socket.leave(value.groupId); // Remove the user from the group
+//                     io.to(value.groupId).emit('userLeftsFromGroup', { userId: key }); // Notify other users in the group that a user has left
+
+//                     const isValidStreamGroupId = mongoose.Types.ObjectId.isValid(value.groupId);
+//                     const streamGroup = isValidStreamGroupId ? StreamGroup.findById(value.groupId) : false;
+
+//                     console.log("streamGroupFound: ", streamGroup);
+
+//                     //==== remove user from streamGroup connectedUsers array ====
+//                     const userId = key;
+//                     const groups = await StreamGroup.find({ isLive: true, connectedUsers: { $in: userId } }).select('connectedUsers'); // get all groups where connectedUsers array contains userId
+
+//                     console.log("userId: ", userId);
+//                     console.log("groups: ", groups);
+
+//                     for (const group of groups) {
+//                         // if (group.connectedUsers.includes(userId)){
+//                         group.connectedUsers.pull(userId);
+//                         await group.save();
+
+//                         if (group.hostUserId == userId) {
+//                             group.isLive = false;
+//                             await group.save();
+//                         }
+//                         // }
+//                     }
+//                     //================================================================
+
+//                 }
+//             });
+
+//             //print all users in the group
+//             console.log(`Users in group (at time of disconnect, after leaving) : ${groupUsers.size}`);
+//         }
+
+//         //======== logic for group chat ends here =========
+
+
+//         io.emit('getOnlineUsers', Object.keys(userSocketMap))
+//     })
+
+//     //============= Group Chat Start =============
+//     socket.on('joinGroup', async ({ userId, groupId }) => {
+
+//         // Store the user’s database ID along with socketId and group information
+//         groupUsers.set(userId, { socketId: socket.id, groupId: groupId })
+
+//         // Add the user to the specified group
+//         socket.join(groupId)
+
+//         const isValidStreamGroupId = mongoose.Types.ObjectId.isValid(groupId);
+//         const streamGroup = isValidStreamGroupId ? await StreamGroup.findOne({ _id: groupId }) : false;
+
+//         // if streamGroup is not found, stop execution
+//         // if (!streamGroup) {
+//         //     console.log(`Stream group ${groupId} not found | inside if condition`);
+//         //     return;
+//         // }
+
+//         if (streamGroup) {
+
+//             // if (streamGroup.isLive == false){
+//             //     socket.to(groupId).emit('streamStatus', { isStreamEnded: true });
+//             //     console.log(`Stream ${groupId} has ended`);
+//             //     return;
+//             // }
+
+//             const isValidUser = mongoose.Types.ObjectId.isValid(userId);
+//             const user = isValidUser ? await User.findOne({ _id: userId }) : false;
+
+//             if (user) {
+//                 streamGroup.connectedUsers.push(user._id);
+//                 await streamGroup.save();
+//             }
+//         }
+
+//         console.log(`after if condition | entered groupId: ${groupId} | streamGroupfound: ${streamGroup ? true : false} | by userId: ${userId}`);
+
+//         // Notify other users in the group that a new user has joined
+//         socket.to(groupId).emit('userJoined', { userId })
+//         console.log(`User ${userId} joined group ${groupId}`)
+
+//         //print all users in the group
+//         console.log(`Users in group ${groupId}: ${groupUsers.size}`);
+//     });
+
+//     // Event: User sends a message to the group
+//     socket.on('sendGroupMessage', ({ userId, groupId, groupMessage }) => {
+//         const userSocketInfoFromGroupUsers = groupUsers.get(userId); // Get user info from the 'users' Map using userId (from DB)
+
+//         if (userSocketInfoFromGroupUsers) {
+//             // Send the message to all users in the group
+//             io.to(groupId).emit('recieveGroupMessage', { senderUserId: userId, groupMessage: groupMessage });
+
+//             // Log the sent message for debugging or tracking
+//             console.log(`User ${userId} sent a message: '${groupMessage}' to group ${groupId}`);
+//         } else {
+//             console.log(`User ${userId} not found in group ${groupId} | inside sendGroupMessage`);
+//         }
+//     });
+
+//     // Event: user leave group
+//     socket.on('leaveGroup', async ({ userId, groupId }) => {
+//         const userSocketInfoFromGroupUsers = groupUsers.get(userId); // Get user info from the 'users' Map using userId (from DB)
+
+//         if (userSocketInfoFromGroupUsers) {
+//             socket.leave(groupId); // Remove the user from the group
+//             io.to(groupId).emit('userLeftsFromGroup', { userId: userId }); // Notify other users in the group that a user has left
+
+//             // Remove the user from the 'users' Map (effectively removing them from the system)
+//             groupUsers.delete(userId);
+
+//             const isValidStreamGroupId = mongoose.Types.ObjectId.isValid(groupId);
+//             const streamGroup = isValidStreamGroupId ? await StreamGroup.findOne({ _id: groupId }) : false;
+
+//             if (streamGroup) {
+//                 if (streamGroup.connectedUsers.includes(userId)) {
+//                     streamGroup.connectedUsers.pull(userId);
+//                     await streamGroup.save();
+
+//                     if (streamGroup.hostUserId == userId) {
+//                         streamGroup.isLive = false;
+//                         await streamGroup.save();
+//                     }
+//                 }
+//             }
+
+//             console.log(`User ${userId} left group ${groupId}`);
+
+//             //print all users in the group
+//             console.log(`Users in group (at time of leave, after leaving) ${groupId}: ${groupUsers.size}`);
+//         } else {
+//             console.log(`User ${userId} not found in group ${groupId} | inside leaveGroup`);
+//         }
+//     });
+
+//     // Event: Get the number of users in a group
+//     socket.on('groupUsersCount', ({ groupId }) => {
+//         const groupUsersCount = io.sockets.adapter.rooms.get(groupId)?.size || 0;
+//         console.log(`Group ${groupId} has ${groupUsersCount} users`);
+
+//         socket.emit('recieveGroupUsersCount', { groupUsersCount: groupUsersCount });
+//     });
+
+//     //============= Group Chat End =============
+// })
+
 io.on('connection', (socket) => {
     console.log('user connected', socket.id);
     const userId = socket.handshake.query.userId
@@ -619,19 +791,22 @@ io.on('connection', (socket) => {
 
     socket.on('disconnect', async () => {
         console.log('user disconnected', socket.id);
-        for (const key in userSocketMap) {
-            if (userSocketMap[key] === socket.id) {
+        for(const key in userSocketMap){
+            if(userSocketMap[key] === socket.id){
                 delete userSocketMap[key]
             }
         }
 
-        //======== logic for group chat start here =========
+                //======== logic for group chat start here =========
 
         // Remove the user from the 'users' Map
+        console.log("groupUsers.size outside: ", groupUsers.size);
 
-        if (groupUsers.size > 0) {
+        if (groupUsers.size > 0){
 
-            groupUsers.forEach(async (value, key) => {
+            console.log("groupUsers.size inside: ", groupUsers.size);
+
+            groupUsers.forEach( async (value, key) => {
                 if (value.socketId === socket.id) {
                     groupUsers.delete(key);
                     console.log(`User ${key} removed from groupUsers | (at the time of disconnect)`);
@@ -647,20 +822,27 @@ io.on('connection', (socket) => {
 
                     //==== remove user from streamGroup connectedUsers array ====
                     const userId = key;
-                    const groups = await StreamGroup.find({ isLive: true, connectedUsers: { $in: userId } }).select('connectedUsers'); // get all groups where connectedUsers array contains userId
+                    const groups = await StreamGroup.find({ isLive: true, connectedUsers: { $in: userId }}).select('connectedUsers'); // get all groups where connectedUsers array contains userId
+                    const hostedGroups = await StreamGroup.find({ isLive: true, hostUserId: userId }).select('hostUserId'); // get all groups where hostUserId is userId
+
+                    //make all groups where user is host, isLive = false
+                    for (const group of hostedGroups){
+                        group.isLive = false;
+                        await group.save();
+                    }
 
                     console.log("userId: ", userId);
                     console.log("groups: ", groups);
 
-                    for (const group of groups) {
+                    for (const group of groups){
                         // if (group.connectedUsers.includes(userId)){
-                        group.connectedUsers.pull(userId);
-                        await group.save();
-
-                        if (group.hostUserId == userId) {
-                            group.isLive = false;
+                            group.connectedUsers.pull(userId);
                             await group.save();
-                        }
+
+                            if (group.hostUserId == userId){
+                                group.isLive = false;
+                                await group.save();
+                            }
                         // }
                     }
                     //================================================================
@@ -688,26 +870,14 @@ io.on('connection', (socket) => {
         socket.join(groupId)
 
         const isValidStreamGroupId = mongoose.Types.ObjectId.isValid(groupId);
-        const streamGroup = isValidStreamGroupId ? await StreamGroup.findOne({ _id: groupId }) : false;
-
-        // if streamGroup is not found, stop execution
-        // if (!streamGroup) {
-        //     console.log(`Stream group ${groupId} not found | inside if condition`);
-        //     return;
-        // }
+        const streamGroup = isValidStreamGroupId ? await StreamGroup.findOne({_id: groupId}) : false;
 
         if (streamGroup) {
 
-            // if (streamGroup.isLive == false){
-            //     socket.to(groupId).emit('streamStatus', { isStreamEnded: true });
-            //     console.log(`Stream ${groupId} has ended`);
-            //     return;
-            // }
-
             const isValidUser = mongoose.Types.ObjectId.isValid(userId);
-            const user = isValidUser ? await User.findOne({ _id: userId }) : false;
+            const user = isValidUser ? await User.findOne({_id: userId}) : false;
 
-            if (user) {
+            if (user){
                 streamGroup.connectedUsers.push(user._id);
                 await streamGroup.save();
             }
@@ -715,12 +885,10 @@ io.on('connection', (socket) => {
 
         console.log(`after if condition | entered groupId: ${groupId} | streamGroupfound: ${streamGroup ? true : false} | by userId: ${userId}`);
 
-        // Notify other users in the group that a new user has joined
-        socket.to(groupId).emit('userJoined', { userId })
-        console.log(`User ${userId} joined group ${groupId}`)
 
-        //print all users in the group
-        console.log(`Users in group ${groupId}: ${groupUsers.size}`);
+        // Notify other users in the group that a new user has joined
+        // socket.to(groupId).emit('userJoined', { userId })
+        console.log(`User ${userId} joined group ${groupId}`)
     });
 
     // Event: User sends a message to the group
@@ -750,14 +918,14 @@ io.on('connection', (socket) => {
             groupUsers.delete(userId);
 
             const isValidStreamGroupId = mongoose.Types.ObjectId.isValid(groupId);
-            const streamGroup = isValidStreamGroupId ? await StreamGroup.findOne({ _id: groupId }) : false;
+            const streamGroup = isValidStreamGroupId ? await StreamGroup.findOne({_id: groupId}) : false;
 
             if (streamGroup) {
-                if (streamGroup.connectedUsers.includes(userId)) {
+                if (streamGroup.connectedUsers.includes(userId)){
                     streamGroup.connectedUsers.pull(userId);
                     await streamGroup.save();
 
-                    if (streamGroup.hostUserId == userId) {
+                    if (streamGroup.hostUserId == userId){
                         streamGroup.isLive = false;
                         await streamGroup.save();
                     }
@@ -768,13 +936,14 @@ io.on('connection', (socket) => {
 
             //print all users in the group
             console.log(`Users in group (at time of leave, after leaving) ${groupId}: ${groupUsers.size}`);
+
         } else {
             console.log(`User ${userId} not found in group ${groupId} | inside leaveGroup`);
         }
     });
 
     // Event: Get the number of users in a group
-    socket.on('groupUsersCount', ({ groupId }) => {
+    socket.on('groupUsersCount', ({groupId}) => {
         const groupUsersCount = io.sockets.adapter.rooms.get(groupId)?.size || 0;
         console.log(`Group ${groupId} has ${groupUsersCount} users`);
 
